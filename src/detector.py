@@ -22,12 +22,16 @@ class Detector:
         """The only part that needs GPT-2 (and a GPU if one is there)."""
         return self.scorer.features(text)
 
-    def analyze(self, text, neural=None):
+    def analyze(self, text, neural=None, figure=True):
+        """figure=False skips the matplotlib waterfall (the web API sends the numbers)."""
         feats = stylometric_features(text)
         feats.update(neural if neural is not None else self.neural_features(text))
         x = pd.DataFrame([feats])[self.feature_names]
         p_ai = float(self.xgb.predict_proba(x)[0, 1])
-        fig, sv_row = shap_local_figure(self.explainer, x)
+        if figure:
+            fig, sv_row = shap_local_figure(self.explainer, x)
+        else:
+            fig, sv_row = None, self.explainer(x)[0]
         contributions = sorted(                      # same numbers as the plot, as plain data
             ({"feature": n, "name": NICE_NAMES.get(n, n), "value": float(v), "shap": float(s)}
              for n, v, s in zip(sv_row.feature_names, sv_row.data, sv_row.values)),

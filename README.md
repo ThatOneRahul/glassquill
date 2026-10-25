@@ -28,6 +28,9 @@ GlassQuill labels a piece of English text as human-written or AI-generated and s
 ## Repo layout
 
 ```
+server.py            FastAPI: JSON API for the detector + serves the website (web/dist)
+web/                 the website: React, Tailwind CSS, Motion, Lucide (Vite)
+tests/               API and site-serving tests (pytest)
 app.py               Gradio app, also the Hugging Face Space entry point
 streamlit_app.py     optional Streamlit front end
 notebook_cells.py    every Colab cell in order (copy them into a notebook)
@@ -69,6 +72,18 @@ python run_pipeline.py --stages evaluate ood paraphrase explain   # results only
 python run_pipeline.py                                # full study from scratch, ~1.5 h on an RTX 3050 (feature extraction for 32k texts)
 python app.py                                         # Gradio demo at http://127.0.0.1:7860
 ```
+
+### The website
+
+```bash
+pip install -r requirements.txt                       # adds fastapi + uvicorn
+cd web && npm install && npm run build && cd ..       # builds the site into web/dist
+python server.py                                      # site + API at http://127.0.0.1:8000
+```
+
+For frontend work, run `python server.py` and `npm run dev` (in `web/`) together: Vite serves on http://localhost:5173 and forwards `/api` to the server. Before deploying, set `SITE_URL` (e.g. `SITE_URL=https://your-domain npm run build`), because canonical links, Open Graph tags, `sitemap.xml` and `robots.txt` are generated from it. Checks: `npm run lint`, `npm run typecheck`, `python -m pytest tests -q`.
+
+Pages: `/` (landing), `/detect` (the detector), `/results` (all metrics, read live from `reports/`), `/method`. The API (`POST /api/analyze`, `GET /api/meta`) validates input (50 words to 12,000 characters), rate-limits per IP, caps request size and sends security headers (CSP, frame and content-type protection). Pasted text is never stored.
 
 Stages: `data → features → train → bert → evaluate → ood → paraphrase → explain`. Every table ends up in `reports/` (start with [`reports/RESULTS.md`](reports/RESULTS.md)) and every plot in `reports/figures/`. The trained XGBoost, TF-IDF + LR and perplexity threshold are committed in `models/`, so the app runs without retraining. DistilBERT (`models/distilbert/`, ~260 MB) is not committed.
 

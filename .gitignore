@@ -8,3 +8,6 @@ __pycache__/
 models/quick/
 reports/quick/
 *.part
+web/node_modules/
+web/dist/
+.pytest_cache/

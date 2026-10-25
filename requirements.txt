@@ -13,3 +13,5 @@ numpy
 matplotlib
 joblib
 pyarrow
+fastapi
+uvicorn
