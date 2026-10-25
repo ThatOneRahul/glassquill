@@ -73,7 +73,7 @@ HC3 + HAP-E + M4GT ─► clean ─► balance per domain ─► split by group 
 - **Training:** hyper-parameters are tuned with 5-fold GroupKFold on the training set only. XGBoost uses monotone constraints where theory and data agree, and the test set is used once, at the end.
 - **Explanations:** TreeSHAP for XGBoost, exact word weights for the linear model, and LIME for DistilBERT.
 
-A file-by-file guide to the code is in [`docs/CODE_WALKTHROUGH.md`](docs/CODE_WALKTHROUGH.md).
+A file-by-file guide to the code is in [`docs/CODE_WALKTHROUGH.md`](docs/CODE_WALKTHROUGH.md). Continuing the project? Start with [`HANDOFF.md`](HANDOFF.md): architecture, design decisions, invariants and common tasks, written so you can also hand it to an AI assistant.
 
 ## API
 
@@ -107,6 +107,7 @@ tests/               API tests (pytest)
 models/              trained models used by the app
 reports/             result tables, figures and run logs
 docs/                technical report and code walkthrough
+HANDOFF.md           guide for anyone (or any AI assistant) continuing the project
 ```
 
 ## Reproducing the results
