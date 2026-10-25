@@ -42,11 +42,50 @@ export function Logo({ dark = true }: { dark?: boolean }) {
   );
 }
 
+/* ---------------- page header (the homepage hero, for inner pages) ---------------- */
+
+export function PageHeader({ eyebrow, title, accent, children, aside }: {
+  eyebrow: string;
+  title: string;
+  accent: string;
+  children?: ReactNode;
+  aside?: ReactNode;
+}) {
+  return (
+    <motion.header
+      initial="hidden"
+      animate="show"
+      variants={group(0.09, 0.05)}
+      className="relative flex flex-wrap items-end justify-between gap-8 pt-32 pb-10 md:pt-40 md:pb-14"
+    >
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-0 left-1/2 -z-0 h-[420px] w-[min(820px,100%)] -translate-x-1/2 rounded-full bg-violet/20 blur-[120px]"
+      />
+      <div className="relative max-w-3xl">
+        <motion.p variants={rise} className="eyebrow">{eyebrow}</motion.p>
+        <h1 className="mt-4 text-[clamp(2.6rem,7vw,5rem)] leading-[0.95] font-extrabold tracking-[-0.04em]">
+          <motion.span variants={rise} className="block">{title}</motion.span>{" "}
+          <motion.span variants={rise} className="block text-flame">{accent}</motion.span>
+        </h1>
+        {children && (
+          <motion.div variants={rise} className="mt-5 max-w-2xl text-lg leading-relaxed text-white/60">
+            {children}
+          </motion.div>
+        )}
+      </div>
+      {aside && <motion.div variants={rise} className="relative">{aside}</motion.div>}
+    </motion.header>
+  );
+}
+
 /* ---------------- buttons ---------------- */
 
 type Tone = "black" | "violet" | "light" | "ghost" | "outline";
 const tones: Record<Tone, string> = {
-  black: "bg-ink text-white hover:bg-ink-2 dark:bg-white dark:text-ink",
+  // on dark pages the primary button is white; its hover must stay light, or dark text
+  // sits on a dark fill and the label disappears
+  black: "bg-ink text-white hover:bg-ink-2 dark:bg-white dark:text-ink dark:hover:bg-lavender-soft",
   violet: "bg-violet text-white hover:bg-violet-deep",
   light: "bg-white text-ink hover:bg-lavender-soft",
   ghost: "text-current hover:bg-black/5 dark:hover:bg-white/10",

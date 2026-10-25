@@ -2,7 +2,6 @@ import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "mo
 import { ArrowRight, Fingerprint, Gauge, ScanText, ShieldCheck, Sparkles, Type } from "lucide-react";
 import { useRef } from "react";
 import { Link } from "react-router-dom";
-import { SiteLayout } from "../components/SiteLayout";
 import { Bar, CountUp, Petals, Reveal, RevealGroup, Skeleton } from "../components/ui";
 import { APP_MODEL, type Row } from "../lib/api";
 import { useMeta } from "../lib/hooks";
@@ -21,7 +20,7 @@ export default function Home() {
   const texts = meta?.results.sources.reduce((s, r) => s + Number(r.human) + Number(r.ai), 0);
 
   return (
-    <SiteLayout>
+    <>
       <Seo
         title="GlassQuill"
         description="Is this text written by a person or an AI? GlassQuill gives a verdict and shows the evidence behind it: perplexity, style signals and word-level weights."
@@ -148,7 +147,7 @@ export default function Home() {
           </motion.div>
         </Reveal>
       </section>
-    </SiteLayout>
+    </>
   );
 }
 

@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { Brain, Database, Eraser, Scale, SplitSquareHorizontal, Sparkles } from "lucide-react";
-import { Skeleton } from "../components/ui";
+import { PageHeader, Skeleton } from "../components/ui";
 import { fmtFeature, useMeta } from "../lib/hooks";
 import { ease, group, lift, pop } from "../lib/motion";
 import { Seo } from "../lib/seo";
@@ -42,14 +42,14 @@ export default function Method() {
   return (
     <>
       <Seo title="Method" description="How GlassQuill was built: datasets, cleaning, leak-free splits, the 18 features, four models, explanations, and the limits of AI-text detection." />
-      <motion.div initial="hidden" animate="show" variants={group(0.07)} className="space-y-4">
-        <motion.header variants={pop} className="pt-2">
-          <p className="eyebrow">Methodology</p>
-          <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">How GlassQuill works</h1>
-          <p className="mt-1 max-w-2xl text-sm text-ink/60 dark:text-white/55">
-            From raw datasets to a verdict with reasons. Every step is reproducible from the project's pipeline script (<code className="font-mono text-xs">run_pipeline.py</code>).
-          </p>
-        </motion.header>
+      <div className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+      <PageHeader eyebrow="Methodology" title="How it works." accent="Nothing hidden.">
+        <p>
+          From raw datasets to a verdict with reasons. Every step is reproducible from the project's
+          pipeline script (<code className="font-mono text-base text-white/80">run_pipeline.py</code>).
+        </p>
+      </PageHeader>
+      <motion.div initial="hidden" animate="show" variants={group(0.07, 0.25)} className="space-y-4">
 
         {/* pipeline */}
         <motion.section variants={pop} className="card p-5 sm:p-8" aria-labelledby="pipe-h">
@@ -136,6 +136,7 @@ export default function Method() {
           </motion.ul>
         </motion.section>
       </motion.div>
+      </div>
     </>
   );
 }

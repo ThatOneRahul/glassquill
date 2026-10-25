@@ -78,8 +78,9 @@ body {
   background: var(--color-card);
   box-shadow: var(--shadow-card);
   &:where(.dark *) {
-    background: var(--color-ink-2);
-    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.06);
+    /* same surface as the homepage cards: faint white fill, hairline border */
+    background: rgb(255 255 255 / 0.03);
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
   }
 }
 @utility eyebrow {

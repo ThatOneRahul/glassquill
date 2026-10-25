@@ -11,7 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Bar, Button, CountUp, Petals, Segmented, Skeleton, Toast } from "../components/ui";
+import { Bar, Button, CountUp, PageHeader, Segmented, Skeleton, Toast } from "../components/ui";
 import { analyze, ApiError, type Analysis, type Contribution, type Verdict } from "../lib/api";
 import { fmtFeature, useMeta } from "../lib/hooks";
 import { ease, group, lift, pop, spring } from "../lib/motion";
@@ -104,51 +104,31 @@ export default function Detect() {
   return (
     <>
       <Seo title="Detector" description="Paste 50 to 400 words of English and get a verdict on whether it reads as human-written or AI-generated, with the evidence behind it." />
-      <h1 className="sr-only">GlassQuill detector</h1>
+      <div className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+      <PageHeader eyebrow="Detector" title="Paste a text." accent="Read the evidence.">
+        <p>50 to 400 words of English works best. Or try a real text the model never saw while training:</p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {meta
+            ? meta.examples.map((e) => (
+                <motion.button
+                  key={e.label}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={spring.press}
+                  onClick={() => {
+                    setText(e.text);
+                    setHint(null);
+                  }}
+                  className="inline-flex h-10 items-center gap-2 rounded-full border border-white/15 px-4 text-sm font-semibold text-white transition-colors hover:border-white/35 hover:bg-white/5"
+                >
+                  <Sparkles className="size-3.5 text-flame" aria-hidden="true" /> {e.label}
+                </motion.button>
+              ))
+            : Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-10 w-36 !rounded-full" />)}
+        </div>
+      </PageHeader>
 
-      <motion.div initial="hidden" animate="show" variants={group(0.07)} className="grid grid-cols-1 gap-4 xl:grid-cols-12">
-        {/* ---- banner (reference: "Work's always better together") ---- */}
-        <motion.section variants={pop} className="relative overflow-hidden rounded-[var(--radius-card)] bg-gradient-to-br from-lilac via-lavender-soft to-lavender p-6 sm:p-8 xl:col-span-8">
-          <Petals className="pointer-events-none absolute -top-12 -right-10 size-52 sm:size-64" />
-          <div className="relative max-w-lg">
-            <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Human or AI? Read the evidence.</h2>
-            <p className="mt-2 text-sm text-ink/65">Paste a text or try one of these real texts the model never saw while training.</p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {meta
-                ? meta.examples.map((e) => (
-                    <motion.button
-                      key={e.label}
-                      whileHover={{ y: -2 }}
-                      whileTap={{ scale: 0.96 }}
-                      transition={spring.press}
-                      onClick={() => {
-                        setText(e.text);
-                        setHint(null);
-                      }}
-                      className="inline-flex h-9 items-center gap-1.5 rounded-full bg-ink px-3.5 text-xs font-semibold text-white"
-                    >
-                      <Sparkles className="size-3.5 text-lavender" aria-hidden="true" /> {e.label}
-                    </motion.button>
-                  ))
-                : Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-9 w-32 !rounded-full !bg-ink/10" />)}
-            </div>
-          </div>
-        </motion.section>
-
-        {/* ---- bands guide ---- */}
-        {/* on phones this guide goes last, so the text box is reachable without scrolling */}
-        <motion.section variants={pop} className="card order-last p-6 xl:order-none xl:col-span-4" aria-labelledby="bands">
-          <div className="flex items-center justify-between">
-            <h2 id="bands" className="font-semibold">Reading the verdict</h2>
-            <Info className="size-4 text-ink/40 dark:text-white/40" aria-hidden="true" />
-          </div>
-          <ul className="mt-4 space-y-3 text-sm">
-            <Band color="bg-ai" label="Likely AI" range="65 – 100%" />
-            <Band color="bg-unsure" label="Unclear" range="35 – 65%" />
-            <Band color="bg-human" label="Likely human" range="0 – 35%" />
-          </ul>
-          <p className="mt-4 text-xs leading-relaxed text-ink/55 dark:text-white/50">The score is the average of two models. Treat it as a second opinion with reasons, never as proof.</p>
-        </motion.section>
+      <motion.div initial="hidden" animate="show" variants={group(0.07, 0.25)} className="grid grid-cols-1 gap-4 xl:grid-cols-12">
 
         {/* ---- input ---- */}
         <motion.section variants={pop} className="card flex flex-col p-5 sm:p-6 xl:col-span-7" aria-labelledby="input-h">
@@ -232,6 +212,19 @@ export default function Detect() {
           </AnimatePresence>
         </motion.section>
 
+        {/* ---- how to read the score ---- */}
+        <motion.section variants={pop} className="card flex flex-wrap items-center gap-x-8 gap-y-3 px-6 py-4 xl:col-span-12" aria-labelledby="bands">
+          <h2 id="bands" className="flex items-center gap-2 text-sm font-semibold">
+            <Info className="size-4 text-white/40" aria-hidden="true" /> Reading the verdict
+          </h2>
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+            <Band color="bg-ai" label="Likely AI" range="65 – 100%" />
+            <Band color="bg-unsure" label="Unclear" range="35 – 65%" />
+            <Band color="bg-human" label="Likely human" range="0 – 35%" />
+          </ul>
+          <p className="text-xs text-white/45 lg:ml-auto">Average of two models. A second opinion with reasons, never proof.</p>
+        </motion.section>
+
         {/* ---- explanations (appear after a result) ---- */}
         <AnimatePresence>
           {result && !loading && (
@@ -244,6 +237,7 @@ export default function Detect() {
           )}
         </AnimatePresence>
       </motion.div>
+      </div>
 
       <Toast message={toast?.msg ?? null} tone={toast?.tone} onClose={closeToast} />
     </>
@@ -254,9 +248,9 @@ export default function Detect() {
 
 function Band({ color, label, range }: { color: string; label: string; range: string }) {
   return (
-    <li className="flex items-center gap-3">
+    <li className="flex items-center gap-2">
       <span className={`size-2.5 rounded-full ${color}`} aria-hidden="true" />
-      <span className="flex-1 font-medium">{label}</span>
+      <span className="font-medium">{label}</span>
       <span className="num text-ink/55 dark:text-white/50">{range}</span>
     </li>
   );

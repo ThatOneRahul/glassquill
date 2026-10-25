@@ -31,7 +31,8 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   }, [open]);
 
   return (
-    <div className="on-dark min-h-dvh bg-ink text-white">
+    // the whole site is dark: `dark` switches every dark: variant on, in every page
+    <div className="dark on-dark min-h-dvh bg-ink text-white">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-ink">
         Skip to content
       </a>
@@ -45,14 +46,25 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             <Logo />
           </Link>
           <ul className="hidden items-center gap-1 md:flex">
-            {NAV.map((n) => (
-              <li key={n.to}>
-                <NavLink to={n.to} className="group relative block px-3.5 py-2 text-sm text-white/70 transition-colors hover:text-white">
-                  {n.label}
-                  <span className="absolute inset-x-3.5 -bottom-0.5 h-px origin-left scale-x-0 bg-flame transition-transform duration-300 group-hover:scale-x-100" />
-                </NavLink>
-              </li>
-            ))}
+            {NAV.map((n) => {
+              const active = pathname === n.to;
+              return (
+                <li key={n.to}>
+                  <NavLink
+                    to={n.to}
+                    aria-current={active ? "page" : undefined}
+                    className={`group relative block px-3.5 py-2 text-sm transition-colors ${active ? "text-white" : "text-white/70 hover:text-white"}`}
+                  >
+                    {n.label}
+                    {active ? (
+                      <motion.span layoutId="nav-active" transition={spring.layout} className="absolute inset-x-3.5 -bottom-0.5 h-0.5 rounded-full bg-flame" />
+                    ) : (
+                      <span className="absolute inset-x-3.5 -bottom-0.5 h-px origin-left scale-x-0 bg-white/40 transition-transform duration-300 group-hover:scale-x-100" />
+                    )}
+                  </NavLink>
+                </li>
+              );
+            })}
           </ul>
           <div className="flex items-center gap-2">
             <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }} transition={spring.press} className="hidden sm:block">
@@ -97,10 +109,15 @@ export function SiteLayout({ children }: { children: ReactNode }) {
                 animate="show"
                 variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }}
               >
-                {[...NAV, { to: "/", label: "Home" }].map((n) => (
+                {[{ to: "/", label: "Home" }, ...NAV].map((n) => (
                   <motion.li key={n.to} variants={{ hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0 } }}>
-                    <NavLink to={n.to} className="block rounded-xl px-3 py-3 text-base font-medium text-white/85 hover:bg-white/5">
+                    <NavLink
+                      to={n.to}
+                      aria-current={pathname === n.to ? "page" : undefined}
+                      className={`flex items-center justify-between rounded-xl px-3 py-3 text-base font-medium hover:bg-white/5 ${pathname === n.to ? "text-white" : "text-white/70"}`}
+                    >
                       {n.label}
+                      {pathname === n.to && <span className="size-1.5 rounded-full bg-flame" aria-hidden="true" />}
                     </NavLink>
                   </motion.li>
                 ))}

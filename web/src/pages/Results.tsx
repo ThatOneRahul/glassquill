@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useInView } from "motion/react";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, Crosshair, Gauge, ShieldCheck, Target } from "lucide-react";
 import { useRef, useState } from "react";
-import { Bar, CountUp, Segmented, Skeleton } from "../components/ui";
+import { Bar, CountUp, PageHeader, Segmented, Skeleton } from "../components/ui";
 import { APP_MODEL, type Row } from "../lib/api";
 import { useMeta } from "../lib/hooks";
 import { ease, group, lift, pop } from "../lib/motion";
@@ -26,15 +26,20 @@ export default function Results() {
   return (
     <>
       <Seo title="Results" description="Accuracy, F1, ROC-AUC and false positive rates of GlassQuill's five models on the test set, the MAGE benchmark and paraphrased AI text." />
-      <motion.div initial="hidden" animate="show" variants={group(0.07)} className="space-y-4">
-        <motion.header variants={pop} className="flex flex-wrap items-end justify-between gap-4 pt-2">
-          <div>
-            <p className="eyebrow">Evaluation</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-4xl">Results</h1>
-            <p className="mt-1 max-w-xl text-sm text-ink/60 dark:text-white/55">{SETS.find((s) => s.value === set)?.about}</p>
-          </div>
-          <Segmented label="Test condition" value={set} onChange={setSet} options={SETS} />
-        </motion.header>
+      <div className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
+      <PageHeader
+        eyebrow="Evaluation"
+        title="Measured,"
+        accent="not claimed."
+        aside={<Segmented label="Test condition" value={set} onChange={setSet} options={SETS} />}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.p key={set} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.2 }}>
+            {SETS.find((s) => s.value === set)?.about}
+          </motion.p>
+        </AnimatePresence>
+      </PageHeader>
+      <motion.div initial="hidden" animate="show" variants={group(0.07, 0.25)} className="space-y-4">
 
         {error && (
           <motion.p variants={pop} role="alert" className="card flex items-center gap-2 p-4 text-sm text-ai">
@@ -112,6 +117,7 @@ export default function Results() {
         </div>
         <ShapGlobal rows={meta?.results.shap_global} />
       </motion.div>
+      </div>
     </>
   );
 }

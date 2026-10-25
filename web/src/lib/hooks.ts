@@ -17,29 +17,6 @@ export function useMeta() {
   return { meta, error };
 }
 
-export type Theme = "light" | "dark";
-
-/** Dashboard theme, remembered per browser. The landing page is always dark. */
-export function useTheme(): [Theme, () => void] {
-  const [theme, setTheme] = useState<Theme>(() => {
-    try {
-      const saved = localStorage.getItem("gq-theme");
-      if (saved === "light" || saved === "dark") return saved;
-    } catch {
-      /* storage blocked: fall back to the system setting */
-    }
-    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-  });
-  useEffect(() => {
-    try {
-      localStorage.setItem("gq-theme", theme);
-    } catch {
-      /* ignore */
-    }
-  }, [theme]);
-  return [theme, () => setTheme((t) => (t === "dark" ? "light" : "dark"))];
-}
-
 export const pct = (v: number, digits = 1) => `${(v * 100).toFixed(digits)}%`;
 
 /** Rates and fractions read better as percentages. */
