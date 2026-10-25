@@ -45,7 +45,7 @@ def train_tfidf_lr(train, seed=42):
     return grid.best_estimator_
 
 
-# Expected direction from the guide (section 4.3): +1 = higher value means more AI-like.
+# Expected direction from prior work: +1 = higher value means more AI-like.
 EXPECTED_DIRECTION = {"log_ppl": -1, "nll_std": -1, "nll_max": -1, "top1_frac": 1,
                       "top10_frac": 1, "mean_entropy": -1, "std_sent_len": -1,
                       "burstiness": -1, "first_person_rate": -1, "contraction_rate": -1}

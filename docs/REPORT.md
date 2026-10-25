@@ -1,9 +1,6 @@
 # GlassQuill: Explainable Detection of AI-Generated Text
 
-**Course:** Applications and Use Cases of Machine Learning (TE7483), ESE case study
-**Department:** AIML, Symbiosis Institute of Technology, Pune. Batch 2024-28, Semester V
-**Team:** _add names and PRNs_
-**Code:** github.com/ThatOneRahul/glassquill
+Technical report. Code: [github.com/ThatOneRahul/glassquill](https://github.com/ThatOneRahul/glassquill)
 
 ---
 
@@ -133,7 +130,7 @@ Every one of the 17 domains has exactly as many human as AI texts (`reports/eda_
 
 \*Difference of class means in pooled standard deviations, on the training set (`reports/feature_means_by_class.csv`). **Answer to RQ1:** the GPT-2 surprise features separate the classes most (about 1.3 SD). Rhythm and vocabulary help less, and sentence length alone is useless.
 
-**Feature selection:** we keep all 18 because each one has a stated hypothesis (guide section 4.3) and XGBoost handles correlated features. SHAP (section 6.4) shows which ones the model actually uses.
+**Feature selection:** we keep all 18 because each one has a stated hypothesis about how AI text differs and XGBoost handles correlated features. SHAP (section 6.4) shows which ones the model actually uses.
 
 ### 3.6 Validation strategy
 - **Group split 70/15/15** (`GroupShuffleSplit`) inside each corpus: one HC3 question or one HAP-E document never appears in two splits. Asserted in code.

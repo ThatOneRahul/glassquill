@@ -1,6 +1,6 @@
 # Code walkthrough
 
-A guide to the code for the viva. It goes file by file, says what each part does and why, and ends with the questions examiners usually ask about code. Read it with the files open; each heading links to the code.
+A guide to the code. It goes file by file, says what each part does and why, and ends with common questions about the design. Read it with the files open; each heading links to the code.
 
 ## The project in one picture
 
@@ -161,7 +161,7 @@ Run them with `python -m pytest tests -q`. They check:
 
 ---
 
-## Questions examiners ask about code
+## Common questions
 
 **Where do you prevent data leakage?** In three places:
 - `group_split` in `src/data.py` splits by question or document and `assert`s that no group crosses from train to test.

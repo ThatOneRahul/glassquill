@@ -151,7 +151,7 @@ function Footer() {
         <div>
           <Logo />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-white/55">
-            A study project for Applications and Use Cases of Machine Learning (TE7483), SIT Pune.
+            Open-source, explainable AI-text detection.
             A GlassQuill score is a second opinion with reasons, never proof on its own.
           </p>
         </div>

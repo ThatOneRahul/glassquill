@@ -49,7 +49,7 @@ export default function Home() {
           </h2>
           <p className="mt-4 max-w-2xl text-white/60">
             The verdict is the average of two models that make different mistakes. Both can show
-            exactly why they decided, so a teacher can check the reasoning instead of trusting a number.
+            exactly why they decided, so a person can check the reasoning instead of trusting a number.
           </p>
         </Reveal>
         <RevealGroup className="mt-12 grid gap-4 md:grid-cols-2" gap={0.12}>
