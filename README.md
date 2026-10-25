@@ -31,7 +31,7 @@ On 4,829 held-out texts (HC3, HAP-E and M4GT, split by question or document so n
 - **Unseen generators:** on MAGE (27 generators that were never used in training), GlassQuill reaches 66.4% accuracy at a 6.8% false positive rate and still catches GPT-4 91% of the time. Small open models (OPT, BLOOM, GPT-J) mostly go undetected.
 - **Paraphrasing:** after T5 rewrites every sentence, GlassQuill still catches 93% of AI texts (98% before).
 
-All tables are in [`reports/RESULTS.md`](reports/RESULTS.md); the full write-up is in [`docs/REPORT.md`](docs/REPORT.md), and the final report (PDF) and slides are in [`submissions/`](submissions/).
+All tables are in [`reports/RESULTS.md`](reports/RESULTS.md); the full write-up is in [`docs/REPORT.md`](docs/REPORT.md), and the final report (PDF) and slides are in [`submissions/`](submissions/). The presentation is also [on Canva](https://canva.link/awpmcoj5tqs8av2).
 
 ## Quick start
 
