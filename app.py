@@ -13,7 +13,7 @@ except ImportError:                   # laptop or Colab: do nothing
 from src.detector import Detector
 
 DEVICE = "cuda" if os.getenv("SPACES_ZERO_GPU") else None   # None = auto
-det = Detector("models", device=DEVICE)
+det = Detector(os.getenv("GLASSQUILL_MODELS", "models"), device=DEVICE)
 
 
 @gpu(duration=15)                     # seconds of GPU time asked for per call

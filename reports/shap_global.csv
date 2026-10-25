@@ -1,0 +1,19 @@
+feature,name,mean_abs_shap,value_vs_shap_spearman,higher_value_pushes_towards
+log_ppl,Perplexity (log),4.5765,-0.848,human
+top10_frac,Share of top-10 guessable words,2.3938,0.9121,AI
+nll_std,Unevenness of surprise,2.2482,-0.9072,human
+mean_entropy,GPT-2 uncertainty,1.2431,0.9667,AI
+top1_frac,Share of top-1 guessable words,1.0604,0.8517,AI
+punct_rate,Punctuation per word,0.6907,-0.9609,human
+avg_sent_len,Average sentence length,0.6289,0.8677,AI
+avg_word_len,Average word length,0.6127,0.9647,AI
+fk_grade,Grade level,0.5148,-0.824,human
+function_word_rate,Function word rate,0.3634,-0.4986,human
+burstiness,Burstiness,0.356,-0.6924,human
+type_token_ratio,Vocabulary richness,0.3283,0.6701,AI
+comma_rate,Commas per word,0.3041,-0.5116,human
+flesch_reading_ease,Reading ease,0.2843,-0.6137,human
+std_sent_len,Sentence length spread,0.2825,0.2117,AI
+nll_max,Most surprising token,0.2729,0.7814,AI
+contraction_rate,Contractions,0.2509,-0.6807,human
+first_person_rate,First-person words,0.1476,0.4055,AI

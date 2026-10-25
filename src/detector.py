@@ -4,7 +4,8 @@ import joblib
 import pandas as pd
 import shap
 
-from src.explain import highlight, lr_word_weights, plain_reasons, shap_local_figure
+from src.explain import (NICE_NAMES, highlight, lr_word_weights, plain_reasons,
+                         shap_local_figure)
 from src.features import PerplexityScorer, stylometric_features
 
 
@@ -27,10 +28,16 @@ class Detector:
         x = pd.DataFrame([feats])[self.feature_names]
         p_ai = float(self.xgb.predict_proba(x)[0, 1])
         fig, sv_row = shap_local_figure(self.explainer, x)
+        contributions = sorted(                      # same numbers as the plot, as plain data
+            ({"feature": n, "name": NICE_NAMES.get(n, n), "value": float(v), "shap": float(s)}
+             for n, v, s in zip(sv_row.feature_names, sv_row.data, sv_row.values)),
+            key=lambda c: -abs(c["shap"]))
         return {
             "p_ai": p_ai,
             "p_ai_lr": float(self.lr.predict_proba([text])[0, 1]),
             "shap_fig": fig,
+            "shap_base": float(sv_row.base_values),   # log-odds; base + sum(shap) = output
+            "contributions": contributions,
             "reasons": plain_reasons(sv_row),
             "highlights": highlight(text, lr_word_weights(self.lr, text)),
         }

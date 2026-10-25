@@ -1,0 +1,1 @@
+["avg_sent_len", "std_sent_len", "burstiness", "type_token_ratio", "avg_word_len", "comma_rate", "punct_rate", "function_word_rate", "first_person_rate", "contraction_rate", "flesch_reading_ease", "fk_grade", "log_ppl", "nll_std", "nll_max", "top1_frac", "top10_frac", "mean_entropy"]

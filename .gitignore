@@ -4,3 +4,7 @@ models/distilbert/
 __pycache__/
 .ipynb_checkpoints/
 .env
+.venv/
+models/quick/
+reports/quick/
+*.part

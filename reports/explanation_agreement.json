@@ -1,0 +1,5 @@
+{
+  "distilbert_shap_vs_lime_jaccard_top10": 0.142,
+  "lime_recovers_lr_true_top10": 0.61,
+  "n_texts": 20
+}

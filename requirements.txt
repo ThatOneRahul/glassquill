@@ -12,3 +12,4 @@ pandas
 numpy
 matplotlib
 joblib
+pyarrow

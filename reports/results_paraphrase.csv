@@ -1,0 +1,5 @@
+model,recall_before,recall_after,drop
+Perplexity threshold,0.9867,0.74,0.2467
+TF-IDF + LR,0.9533,0.7533,0.2
+XGBoost,0.9933,0.7667,0.2267
+DistilBERT,1.0,0.9667,0.0333

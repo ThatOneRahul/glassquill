@@ -1,0 +1,4 @@
+{
+  "threshold": -2.7984838485717773,
+  "rule": "AI if -log_ppl >= threshold"
+}

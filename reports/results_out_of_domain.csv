@@ -1,0 +1,5 @@
+model,accuracy,precision,recall,f1,roc_auc,fpr
+Perplexity threshold,0.634,0.8602,0.32,0.4665,0.6806,0.052
+TF-IDF + LR,0.561,0.8315,0.153,0.2584,0.5816,0.031
+XGBoost,0.6415,0.955,0.297,0.4531,0.8026,0.014
+DistilBERT,0.6425,0.8065,0.375,0.5119,0.6931,0.09
