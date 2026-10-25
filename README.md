@@ -154,6 +154,13 @@ GlassQuill is trained and evaluated on public research datasets. Each one keeps 
 
 It builds on GPT-2, DistilBERT, XGBoost, SHAP and LIME.
 
+## Authors
+
+- Ranjan Verma
+- Rahul Narkhede
+- Priyansh Johri
+- Priyansh Pandey
+
 ## License
 
 [MIT](LICENSE)
