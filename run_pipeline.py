@@ -23,7 +23,8 @@ import numpy as np
 import pandas as pd
 import torch
 
-from src.data import HC3_URL, MAGE_URL, group_split, load_hc3, load_mage, prepare
+from src.data import (HAPE_FILES, HAPE_URL, HC3_URL, M4GT_URL, MAGE_URL, group_split,
+                      load_hape, load_hc3, load_m4gt, load_mage, prepare)
 
 STAGES = ["data", "features", "train", "bert", "evaluate", "ood", "paraphrase", "explain"]
 SEED = 42
@@ -42,10 +43,14 @@ class Run:
             os.makedirs(d, exist_ok=True)
         self.cache = "data"                         # raw downloads are shared by both modes
         self.dev = "cuda" if torch.cuda.is_available() else "cpu"
-        self.per_class = 300 if quick else 6000     # HC3 texts per class before the split
+        self.corpora = ["hc3", "hape", "m4gt"]
+        # texts per class and corpus before the split (HC3 as in the guide)
+        self.per_class = ({"hc3": 300, "hape": 200, "m4gt": 300} if quick else
+                          {"hc3": 6000, "hape": 4000, "m4gt": 6000})
         self.ood_per_class = 100 if quick else 1000
-        self.n_para = 20 if quick else 150
-        self.n_agree = 5 if quick else 20
+        # kept small so the robustness and explanation stages take minutes, not an hour
+        self.n_para = 20 if quick else 60
+        self.n_agree = 5 if quick else 10
         self.bert_epochs = 1 if quick else 2
         self._mem = {}
 
@@ -102,11 +107,14 @@ class Run:
 
     def score_all(self, d, Xd):
         """Score and threshold for every model. Higher score = more AI-like."""
+        lr = self.lr().predict_proba(d["text"])[:, 1]
+        xgb = self.xgb().predict_proba(Xd[self.feats()])[:, 1]
         return {
             "Perplexity threshold": (-Xd["log_ppl"].values, self.thr()),
-            "TF-IDF + LR": (self.lr().predict_proba(d["text"])[:, 1], 0.5),
-            "XGBoost": (self.xgb().predict_proba(Xd[self.feats()])[:, 1], 0.5),
+            "TF-IDF + LR": (lr, 0.5),
+            "XGBoost": (xgb, 0.5),
             "DistilBERT": (self.bert_proba(d["text"])[:, 1], 0.5),
+            "XGBoost + LR (app)": ((xgb + lr) / 2, 0.5),   # the verdict the app shows
         }
 
     def _load(self, key, fn):
@@ -124,12 +132,33 @@ def download(url, path):
 
 
 # ---- stages ------------------------------------------------------------
+def load_corpus(r, name):
+    """Raw rows of one training corpus: qid (group), source, text, label, generator."""
+    if name == "hc3":
+        d = load_hc3(download(HC3_URL, r.p(r.cache, "hc3_all.jsonl")))
+        return d.assign(generator=np.where(d["label"] == 1, "chatgpt", "human"))
+    if name == "hape":
+        os.makedirs(r.p(r.cache, "hape"), exist_ok=True)
+        return load_hape({f: download(HAPE_URL.format(f), r.p(r.cache, "hape", f + ".parquet"))
+                          for f in HAPE_FILES})
+    return load_m4gt(download(M4GT_URL, r.p(r.cache, "coling_dev.parquet")))
+
+
 def stage_data(r):
-    """Step 3: load, clean, balance and split HC3 by question, then EDA."""
-    raw = load_hc3(download(HC3_URL, r.p(r.cache, "hc3_all.jsonl")))
-    print("  raw:", raw.shape, raw["label"].value_counts().to_dict())
-    df = prepare(raw, per_class=r.per_class, seed=SEED)
-    train, val, test = group_split(df, seed=SEED)
+    """Step 3: load, clean, balance and split every corpus by its groups, then EDA.
+
+    Each corpus is split on its own (HC3 by question, HAP-E by source document,
+    M4GT by text), then the three train / val / test parts are joined.
+    """
+    parts = []
+    for name in r.corpora:
+        raw = load_corpus(r, name)
+        print(f"  {name} raw:", raw.shape, raw["label"].value_counts().to_dict())
+        df = prepare(raw, per_class=r.per_class[name], seed=SEED, truncate=name != "hc3")
+        parts.append([d.assign(corpus=name) for d in group_split(df, seed=SEED)])
+    train, val, test = [pd.concat(p, ignore_index=True).astype({"qid": str})
+                        for p in zip(*parts)]
+    df = pd.concat([train, val, test], ignore_index=True)
     for name, d in [("train", train), ("val", val), ("test", test)]:
         d.to_parquet(r.p(r.data, f"{name}.parquet"))
         print(f"  {name}: {len(d)} texts, share AI {d['label'].mean():.3f}")
@@ -200,7 +229,19 @@ def stage_evaluate(r):
     res.round(4).to_csv(r.p(r.reports, "results_in_domain.csv"), index=False)
     print(res.round(3).to_string(index=False))
 
-    fig, axes = plt.subplots(1, 4, figsize=(16, 4))
+    # the same metrics inside each corpus, and accuracy for each generator
+    by_corpus = pd.DataFrame([{"corpus": c, **evaluate(m, test["label"][k], s[k], t)}
+                              for c, k in test.groupby("corpus").groups.items()
+                              for m, (s, t) in scores.items()])
+    by_corpus.round(4).to_csv(r.p(r.reports, "results_in_domain_by_corpus.csv"), index=False)
+    print(by_corpus.pivot(index="model", columns="corpus", values="f1").round(3))
+    hits = pd.DataFrame({m: ((s >= t).astype(int) == test["label"]).astype(float)
+                         for m, (s, t) in scores.items()})
+    gen = hits.assign(generator=test["generator"]).groupby("generator")
+    gen.mean().assign(n=gen.size()).sort_values("XGBoost").round(3).to_csv(
+        r.p(r.reports, "test_accuracy_by_generator.csv"))
+
+    fig, axes = plt.subplots(1, len(scores), figsize=(4 * len(scores), 4))
     for ax, (m, (s, t)) in zip(axes, scores.items()):
         ConfusionMatrixDisplay.from_predictions(
             test["label"], (s >= t).astype(int), display_labels=["Human", "AI"],
@@ -260,6 +301,7 @@ def mage_source(src):
 def stage_paraphrase(r):
     """Step 7c: recall on AI texts before and after T5 paraphrasing (H4)."""
     test = r.split("test")
+    test = test[test["corpus"] == "hc3"]            # same 150 HC3 texts as in the guide
     ai = test[test["label"] == 1].sample(n=min(r.n_para, int(test["label"].sum())),
                                          random_state=SEED).reset_index(drop=True)
     path = r.p(r.data, "paraphrased.parquet")
@@ -386,7 +428,9 @@ def write_summary(r):
     parts = ["# GlassQuill results\n",
              "Generated by `run_pipeline.py`. Positive class = AI. "
              "FPR = share of human texts wrongly flagged as AI.\n",
-             md(rp("results_in_domain.csv"), "In-domain (HC3 test)"),
+             md(rp("results_in_domain.csv"), "In-domain (HC3 + HAP-E + M4GT test)"),
+             md(rp("results_in_domain_by_corpus.csv"), "In-domain, per corpus"),
+             md(rp("test_accuracy_by_generator.csv"), "Test accuracy per generator"),
              md(rp("results_out_of_domain.csv"), "Out-of-domain (MAGE test sample)"),
              md(rp("results_paraphrase.csv"), "Paraphrased AI text (recall)"),
              md(rp("feature_means_by_class.csv"), "Feature means by class (RQ1)"),

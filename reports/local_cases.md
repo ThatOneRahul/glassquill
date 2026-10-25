@@ -1,33 +1,33 @@
 # Local explanations (XGBoost + SHAP)
 
-## true_ai (P(AI) = 1.00, source: finance)
+## true_ai (P(AI) = 1.00, source: reddit_eli5)
 
-- Perplexity (log) = 1.98 pushed the score towards AI
-- Unevenness of surprise = 2.05 pushed the score towards AI
-- Share of top-10 guessable words = 0.89 pushed the score towards AI
+- Unevenness of surprise = 1.97 pushed the score towards AI
+- Perplexity (log) = 2.28 pushed the score towards AI
+- Share of top-10 guessable words = 0.84 pushed the score towards AI
 
-> A market order is an order to buy or sell a security at the best available price, and it is generally used when you want to execute a trade immediately. This type of order is often used when the trader has a strong conviction about the direction of the market and wants to get the trade done as quickly as possible.On the other hand, a limit order is an order to buy or sell a security at a specific price or better. This type of order is used when the trader wants to set a certain price at which th...
+> When you search for something on the internet using Google, Google is able to search through billions of web pages very quickly because it has built a special database just for searching the internet. This database is stored on many computers all around the world, which helps Google search the internet even faster. When you search for something on your computer's hard drive, your computer has to look through all of the files and folders on your hard drive to find what you're looking for. This ca...
 
 ## true_human (P(AI) = 0.00, source: reddit_eli5)
 
-- Perplexity (log) = 3.64 pushed the score towards human
-- Share of top-10 guessable words = 0.68 pushed the score towards human
-- Unevenness of surprise = 2.99 pushed the score towards human
+- Average word length = 4.41 pushed the score towards human
+- Commas per word = 0.04 pushed the score towards human
+- Perplexity (log) = 3.23 pushed the score towards human
 
-> Your computer takes the data you " delete " and just sort of flags it. The flag basically means " Hey, I'm going to go hang out in the Recycle Bin. I'm still around, but overwrite me if you need to write something else. " (When you choose to " Recover " something from your recycle bin, you're basically clearing that flag.) This is also how some data recovery applications function. They scan the disk for any flagged data and clear the flag (or " recover " the data)....
+> There's actually not much point to it. The cruising altitude for a commercial jet is well out of the parachuting range. If the doors to an airplane were opened while you were at cruising altitude, everyone would either be sucked out of the plane, or would lose consciousness because there's such a small amount of air up there. So if a plane was in the middle of crashing, it would only make sense to use a parachute when the plane is into the safe parachute altitude range. And trying to organize a ...
 
-## false_positive (P(AI) = 0.53, source: reddit_eli5)
+## false_positive (P(AI) = 0.98, source: wiki_csai)
 
-- GPT-2 uncertainty = 3.65 pushed the score towards AI
-- Perplexity (log) = 2.95 pushed the score towards human
-- Burstiness = 0.14 pushed the score towards AI
+- Average word length = 7.06 pushed the score towards AI
+- Sentence length spread = 5.31 pushed the score towards AI
+- Function word rate = 0.20 pushed the score towards human
 
-> Assuming that you're using a digital camera, the camera's sensor has a grid of pixels, and a lens that projects an image onto the sensor. If the distance between the stripes in the projected image is less than the distance between pixels in the sensor, the sensor is physically unable to capture the detail in the stripes. The data format used to store photos (JPEG) also has limitations that are more apparent when the photo has fine detail, like stripes....
+> Stochastic optimization (SO) methods are optimization methods that generate and use random variables. For stochastic problems, the random variables appear in the formulation of the optimization problem itself, which involves random objective functions or random constraints. Stochastic optimization methods also include methods with random iterates. Some stochastic optimization methods use random iterates to solve stochastic problems, combining both meanings of stochastic optimization. Stochastic ...
 
-## false_negative (P(AI) = 0.07, source: reddit_eli5)
+## false_negative (P(AI) = 0.38, source: reddit_eli5)
 
-- GPT-2 uncertainty = 3.68 pushed the score towards AI
-- Share of top-1 guessable words = 0.35 pushed the score towards human
-- Punctuation per word = 0.21 pushed the score towards human
+- Average word length = 4.28 pushed the score towards human
+- Unevenness of surprise = 2.27 pushed the score towards AI
+- Sentence length spread = 3.54 pushed the score towards AI
 
-> The small speakers you see in the picture are called "tweeters." They are used to produce high frequency sounds, such as the s's in "sizzle" or the high notes in a piano. The larger speakers are called "woofers" and they produce low frequency sounds, like the bass in music. By combining the sounds from both the tweeters and the woofers, we can get a full and balanced sound. Is that helpful?...
+> Cable stations often play the same movie twice in a row on weekends because it can be a good way to fill airtime and attract viewers. Some people might enjoy watching the same movie twice, especially if it is a favorite movie or if they missed it the first time it was shown. Playing two movies with overlapping audiences might also be a good idea, but it can be difficult to predict which movies will have the most appeal to viewers. It is ultimately up to the cable stations to decide which movies ...

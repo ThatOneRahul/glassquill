@@ -1,4 +1,4 @@
 {
-  "threshold": -2.7984838485717773,
+  "threshold": -2.978700637817383,
   "rule": "AI if -log_ppl >= threshold"
 }

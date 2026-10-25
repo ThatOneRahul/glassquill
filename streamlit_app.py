@@ -19,7 +19,8 @@ if st.button("Analyse", type="primary"):
         st.error("Please paste at least 50 words.")
     else:
         r = load_detector().analyze(text)
-        st.metric("Chance it is AI-generated (XGBoost)", f"{r['p_ai']:.0%}")
-        st.caption(f"Word model (TF-IDF + LR): {r['p_ai_lr']:.0%} AI")
+        st.metric("Chance it is AI-generated", f"{r['p_final']:.0%}")
+        st.caption(f"Style model (XGBoost): {r['p_ai']:.0%} AI. "
+                   f"Word model (TF-IDF + LR): {r['p_ai_lr']:.0%} AI")
         st.markdown("**Top reasons**\n\n" + r["reasons"])
         st.pyplot(r["shap_fig"])

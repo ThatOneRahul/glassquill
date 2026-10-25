@@ -26,8 +26,9 @@ def run(text):
         raise gr.Error("Please paste at least 50 words.")
     plt.close("all")
     r = det.analyze(text, neural=neural_features(text))
-    verdict = {"AI-generated": r["p_ai"], "Human-written": 1 - r["p_ai"]}
-    reasons = (f"**Main model (XGBoost) says {r['p_ai']:.0%} AI.** "
+    verdict = {"AI-generated": r["p_final"], "Human-written": 1 - r["p_final"]}
+    reasons = (f"**{r['p_final']:.0%} AI** (average of two models). "
+               f"Style model (XGBoost) says {r['p_ai']:.0%} AI. "
                f"Word model (TF-IDF + LR) says {r['p_ai_lr']:.0%} AI.\n\n"
                f"Top reasons:\n{r['reasons']}")
     return verdict, reasons, r["shap_fig"], r["highlights"]

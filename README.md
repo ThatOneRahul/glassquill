@@ -4,7 +4,7 @@
 
 GlassQuill labels a piece of English text as human-written or AI-generated and shows why. It compares four models, tests them on other LLMs and on paraphrased text and explains every prediction with SHAP and LIME.
 
-**Start here:** read the full project guide in [`docs/GlassQuill_Project_Guide.pdf`](docs/GlassQuill_Project_Guide.pdf). It covers the background, datasets, method, step-by-step build, deployment, rubric mapping and viva prep.
+**Start here:** the project report is [`docs/REPORT.md`](docs/REPORT.md) and the viva sheet is [`docs/VIVA.md`](docs/VIVA.md). The original build guide is [`docs/GlassQuill_Project_Guide.pdf`](docs/GlassQuill_Project_Guide.pdf).
 
 ## Models
 
@@ -12,13 +12,18 @@ GlassQuill labels a piece of English text as human-written or AI-generated and s
 |---|---|---|
 | Perplexity threshold | GPT-2 log perplexity | the score itself |
 | TF-IDF + logistic regression | word and word-pair weights | exact word contributions |
-| XGBoost (main model) | 18 style and perplexity features | SHAP |
+| XGBoost | 18 style and perplexity features, monotone constraints | SHAP |
 | DistilBERT | raw text | LIME and SHAP text |
+| **App verdict** | mean of XGBoost and TF-IDF + LR | both of the above |
 
 ## Data
 
-- **HC3** (`Hello-SimpleAI/HC3`): human and ChatGPT answers to the same questions. Main train, validation and test data.
-- **MAGE** (`yaful/MAGE`, test split): texts from many LLMs and domains. Out-of-domain test.
+- **HC3** (`Hello-SimpleAI/HC3`): human and ChatGPT (2022) answers to the same questions.
+- **HAP-E** (`browndw/human-ai-parallel-corpus`): human text in 6 genres, continued by GPT-4o, GPT-4o-mini and Llama-3 Instruct.
+- **M4GT** (from `Jinyan1/COLING_2025_MGT_en`, M4GT part only): 6 domains, with GPT-4o, GPT-4, GPT-3.5-turbo, Mixtral, Llama-3, Gemma and Cohere.
+- **MAGE** (`yaful/MAGE`, test split): 27 generators, 14 domains. Out-of-domain test only, never trained on.
+
+32k texts in total, with equal human and AI counts in each of 17 domains, split by question or document (70/15/15).
 
 ## Repo layout
 
@@ -28,7 +33,7 @@ streamlit_app.py     optional Streamlit front end
 notebook_cells.py    every Colab cell in order (copy them into a notebook)
 run_pipeline.py      the same steps as one resumable local script
 requirements.txt
-docs/                the project guide (PDF)
+docs/                report, viva sheet, project guide (PDF)
 src/                 data, features, models, DistilBERT, explanations, detector
 models/              saved models go here after training
 reports/             result tables, RESULTS.md and the run log
@@ -59,65 +64,75 @@ token = userdata.get("GITHUB_TOKEN")
 python -m venv .venv && .venv/Scripts/activate        # Linux/macOS: source .venv/bin/activate
 pip install torch --index-url https://download.pytorch.org/whl/cu128
 pip install -r requirements.txt gradio
-python run_pipeline.py --quick                        # 5-minute smoke test, writes to */quick/
-python run_pipeline.py                                # full study (about 45 min on an RTX 3050)
-python run_pipeline.py --stages ood explain           # rerun only some stages
+python run_pipeline.py --quick                        # ~10-minute smoke test on a small sample, writes to */quick/
+python run_pipeline.py --stages evaluate ood paraphrase explain   # results only, ~10 min, reuses saved features
+python run_pipeline.py                                # full study from scratch, ~1.5 h on an RTX 3050 (feature extraction for 32k texts)
 python app.py                                         # Gradio demo at http://127.0.0.1:7860
 ```
 
-Stages: `data → features → train → bert → evaluate → ood → paraphrase → explain`. Every table ends up in `reports/` (start with [`reports/RESULTS.md`](reports/RESULTS.md)) and every plot in `reports/figures/`. The trained XGBoost, TF-IDF + LR and perplexity threshold go in `models/`. DistilBERT goes in `models/distilbert/`, which is not committed (about 260 MB).
+Stages: `data → features → train → bert → evaluate → ood → paraphrase → explain`. Every table ends up in `reports/` (start with [`reports/RESULTS.md`](reports/RESULTS.md)) and every plot in `reports/figures/`. The trained XGBoost, TF-IDF + LR and perplexity threshold are committed in `models/`, so the app runs without retraining. DistilBERT (`models/distilbert/`, ~260 MB) is not committed.
 
-## Results (full run, 25 October 2026, seed 42)
+## Results (seed 42)
 
-**In-domain, HC3 test** (1,795 texts, split by question, every source 50/50 human/AI)
-
-| Model | Accuracy | F1 | ROC-AUC | FPR |
-|---|---|---|---|---|
-| Perplexity threshold | 0.974 | 0.974 | 0.993 | 0.031 |
-| TF-IDF + LR | 0.974 | 0.975 | 0.997 | 0.016 |
-| **XGBoost (main)** | **0.987** | **0.987** | 0.999 | **0.014** |
-| DistilBERT | 0.983 | 0.983 | 1.000 | 0.032 |
-
-**Out-of-domain, MAGE** (1,000 human + 1,000 AI texts, 14 domains, 12 generator families)
+**In-domain test** (4,829 texts from HC3 + HAP-E + M4GT, never seen in training)
 
 | Model | Accuracy | F1 | ROC-AUC | FPR |
 |---|---|---|---|---|
-| Perplexity threshold | 0.634 | 0.466 | 0.681 | 0.052 |
-| TF-IDF + LR | 0.561 | 0.258 | 0.582 | 0.031 |
-| **XGBoost** | **0.642** | 0.453 | **0.803** | **0.014** |
-| DistilBERT | 0.642 | 0.512 | 0.693 | 0.090 |
+| Perplexity threshold | 0.839 | 0.827 | 0.902 | 0.093 |
+| TF-IDF + LR | 0.959 | 0.959 | 0.990 | 0.030 |
+| XGBoost | 0.923 | 0.923 | 0.978 | 0.066 |
+| DistilBERT | 0.961 | 0.963 | 0.997 | 0.071 |
+| **App verdict (XGBoost + LR)** | **0.974** | **0.974** | 0.995 | **0.020** |
 
-**Paraphrased AI text** (150 HC3 test AI texts rewritten with T5): recall before → after
+The app's rule (the mean of the two explainable models) was chosen on the validation set (0.972 accuracy, 0.021 FPR) before the test set was looked at.
 
-| Perplexity | TF-IDF + LR | XGBoost | DistilBERT |
-|---|---|---|---|
-| 0.99 → 0.74 | 0.95 → 0.75 | 0.99 → 0.77 | 1.00 → 0.97 |
+**Out-of-domain, MAGE** (2,000 texts, 27 generators we never trained on)
 
-**Explanations:** SHAP vs LIME top-10 word overlap for DistilBERT: Jaccard 0.14. LIME finds 61% of the true top-10 words of the logistic regression.
+| Model | Accuracy | F1 | ROC-AUC | FPR |
+|---|---|---|---|---|
+| Perplexity threshold | 0.656 | 0.551 | 0.681 | 0.111 |
+| TF-IDF + LR | 0.606 | 0.426 | 0.648 | 0.079 |
+| XGBoost | 0.634 | 0.532 | 0.611 | 0.149 |
+| DistilBERT | 0.655 | 0.585 | 0.696 | 0.176 |
+| **App verdict** | **0.664** | 0.542 | 0.655 | **0.068** |
 
-What this says, in short:
-- **RQ1:** the GPT-2 features separate the classes best (log perplexity, top-10 share, nll_std: effect sizes around 1.7 SD). Style features help less. One surprise: `mean_entropy` pushes towards AI, the opposite of the guide's expectation.
-- **RQ2:** the explainable XGBoost matches or beats DistilBERT in-domain and has the lowest FPR on every test set.
-- **RQ3 / H3:** all models lose about 35 points on MAGE. They still catch GPT-3.5, GPT-4 and davinci (55–79%) but almost never catch small base models such as OPT, BLOOM and GPT-J (0–6%), whose sampled text has human-like perplexity. See `reports/ood_accuracy_by_generator.csv`.
-- **H4:** paraphrasing lowers recall for every model. The perplexity-based models lose 22–25 points and DistilBERT only 3.
-- **RQ4:** SHAP and LIME barely agree on DistilBERT. LIME is only partly reliable even when the true answer is known.
+The app verdict catches GPT-4 (90%) and GPT-3.5 (80%) on MAGE, but almost never small base models such as OPT, BLOOM and GPT-J (0-4%). Their sampled text has human-like perplexity. See `reports/ood_accuracy_by_generator.csv`.
 
-## Data issues found and fixed (beyond section 3.1 of the guide)
+**Paraphrased AI text** (60 HC3 test AI texts rewritten sentence by sentence with T5): recall before → after
 
-The guide's rule is "above 99% accuracy, look for a shortcut". The first full run hit 99.3%, and checking turned up these problems:
+| Perplexity | TF-IDF + LR | XGBoost | DistilBERT | App verdict |
+|---|---|---|---|---|
+| 1.00 → 0.93 | 0.93 → 0.77 | 1.00 → 0.95 | 1.00 → 1.00 | 0.98 → 0.93 |
 
-1. **Source imbalance.** After the 50–400 word filter, `open_qa` had 20 human vs 764 AI texts and finance 530 vs 1,024, so a model could learn topic instead of style. `prepare()` now samples the same number of human and AI texts within every source (`balance_by="source"`; pass `None` for the guide's original sampling).
-2. **Tokenizer leftovers in human answers only.** HC3 human answers were word-tokenized and the ChatGPT ones were not. In human texts: `do n't` / `it 's` (34% of human texts vs 0.015% of AI), `( word )` (35% vs 0.01%), `URL_0` link placeholders (11.6% vs 0.07%), ` -- ` and `' word '`. These were free giveaways for TF-IDF and DistilBERT, and they also raised GPT-2 perplexity for human text. `clean_text()` now undoes all of them, which applies to MAGE too.
+**Explanations:** the top SHAP features for XGBoost are log perplexity, `nll_std`, average word length and `top1_frac` (`reports/figures/shap_beeswarm.png`). SHAP and LIME barely agree on DistilBERT (top-10 Jaccard 0.06). LIME recovers 51% of the true top-10 words of the logistic regression, so it is only partly reliable.
 
-After both fixes every model is under 99%. The perplexity baseline dropped from 98.7% to 97.4%.
+## What changed after the first version
+
+1. **Modern AI text.** Trained on HC3 alone, the model labelled a current ChatGPT paragraph as 100% human. It had only seen 2022 ChatGPT. We added HAP-E and M4GT (GPT-4o, GPT-4, Llama-3, Mixtral, Gemma and more), and the same paragraph now scores 99% AI.
+2. **Monotone constraints in XGBoost.** A feature may only push in the direction both theory and data agree on (e.g. lower burstiness can only push towards AI). The HC3-only model had learned "very even sentences mean human".
+3. **Shortcut removal.** The first run scored 99.3%, which the guide says to distrust. HC3 human answers were word-tokenized (`do n't` in 34% of human vs 0.02% of AI texts, `( x )`, `URL_0`). Sources were also unbalanced (open_qa: 20 human vs 764 AI), and M4GT AI texts carried markdown (`**`, `#`). `clean_text()` removes all of these, and `prepare()` balances human and AI within each of the 17 domains.
+4. **Tried and rejected:** a modern reader LM (Qwen2.5-0.5B) and Binoculars instead of GPT-2. They added only +0.01 to +0.04 AUC and were 25× slower.
+
+## Rubric map (ESE, 30 marks)
+
+| Component | Marks | Where |
+|---|---|---|
+| Problem refinement & use case | 3 | `docs/REPORT.md` §1 |
+| Dataset, preprocessing, features | 4 | §3, `reports/eda_source_counts.csv`, `feature_means_by_class.csv`, `figures/length_hist.png` |
+| Methodology & pipeline | 5 | §4 (pipeline diagram, model justification, tuning) |
+| Implementation | 5 | `src/`, `run_pipeline.py`, `app.py`, run logs in `reports/` |
+| Results & comparison | 5 | §6, `reports/RESULTS.md`, confusion matrices, ROC, SHAP figures |
+| Report | 3 | `docs/REPORT.md` |
+| Presentation | 2 | slides (to do) + live demo |
+| Viva | 3 | `docs/VIVA.md` |
 
 ## Status
 
-- [x] Project guide
-- [x] Starter code (tested end to end on dummy data, October 2026)
-- [x] Run on HC3 and record results
-- [x] Robustness tests and explanation analysis
-- [ ] Deploy the app (runs locally; the HF Space is not created yet)
-- [ ] Report and slides
+- [x] Data, features, four models, evaluation on three test conditions
+- [x] Explanations (SHAP, LIME, word weights) and agreement checks
+- [x] App working locally
+- [x] Report and viva sheet
+- [ ] Slides
+- [ ] Hugging Face Space deployment
 
 *Study project. A detector score should never be the only evidence that someone used AI.*

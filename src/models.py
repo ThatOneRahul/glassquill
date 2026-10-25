@@ -41,10 +41,28 @@ def train_tfidf_lr(train, seed=42):
     return grid.best_estimator_
 
 
+# Expected direction from the guide (section 4.3): +1 = higher value means more AI-like.
+EXPECTED_DIRECTION = {"log_ppl": -1, "nll_std": -1, "nll_max": -1, "top1_frac": 1,
+                      "top10_frac": 1, "mean_entropy": -1, "std_sent_len": -1,
+                      "burstiness": -1, "first_person_rate": -1, "contraction_rate": -1}
+
+
+def monotone_directions(X, y):
+    """Constrain a feature only when the theory and the training data agree on its
+    direction. Without this the trees can learn odd rules, e.g. 'very even sentence
+    lengths mean human', which break on text unlike the training data."""
+    gap = X[y == 1].mean() - X[y == 0].mean()
+    return {f: d for f, d in EXPECTED_DIRECTION.items()
+            if f in X.columns and np.sign(gap[f]) == d}
+
+
 # Model 3: XGBoost on style + perplexity features (explained with SHAP)
-def train_xgb(X_train, y_train, groups, seed=42):
+def train_xgb(X_train, y_train, groups, seed=42, monotone=True):
+    cons = monotone_directions(X_train, np.asarray(y_train)) if monotone else {}
+    print("monotone constraints:", cons)
     base = XGBClassifier(n_estimators=400, subsample=0.8, colsample_bytree=0.8,
-                         eval_metric="logloss", random_state=seed)
+                         eval_metric="logloss", random_state=seed,
+                         monotone_constraints=cons or None)
     grid = GridSearchCV(base, {"max_depth": [3, 4, 6], "learning_rate": [0.05, 0.1]},
                         cv=GroupKFold(n_splits=5), scoring="f1", n_jobs=-1)
     grid.fit(X_train, y_train, groups=groups)
