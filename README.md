@@ -122,7 +122,7 @@ The datasets download automatically on the first run. Every stage saves its outp
 ## Testing
 
 ```bash
-python -m pytest tests -q           # 27 API tests
+python -m pytest tests -q           # 28 API tests
 cd web && npm run lint && npm run typecheck
 ```
 

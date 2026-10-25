@@ -32,7 +32,7 @@ Two programs, one shared library (`src/`):
 | `src/detector.py` | analyse one text with the saved models | 43 |
 | `run_pipeline.py` | the whole study, one function per stage | ~430 |
 | `server.py` | the web API and its security | ~240 |
-| `tests/test_server.py` | 27 automatic checks of the API | |
+| `tests/test_server.py` | 28 automatic checks of the API | |
 | `web/src/` | the website (React) | |
 
 ---
@@ -101,8 +101,8 @@ Both grid searches use `GroupKFold(n_splits=5)` with `groups=qid`, so the valida
 | [`shap_local_figure`](../src/explain.py#L29) | a waterfall plot for one text (local explanation) |
 | [`plain_reasons`](../src/explain.py#L40) | the 3 largest SHAP values as sentences: "Perplexity = 2.73 pushed towards AI" |
 | [`lr_word_weights`](../src/explain.py#L52) | exact word contributions of the LR model: TF-IDF value × coefficient |
-| [`highlight`](../src/explain.py#L61) | those weights matched to the words of the text, for the coloured word view |
-| [`lime_explain`](../src/explain.py#L71) | LIME: remove random words 500 times, fit a small linear model, return its word weights |
+| [`highlight`](../src/explain.py#L62) | those weights matched to the words of the text, for the coloured word view |
+| [`lime_explain`](../src/explain.py#L72) | LIME: remove random words 500 times, fit a small linear model, return its word weights |
 
 **SHAP property to quote:** base value + sum of all SHAP values = the model's output in log-odds. TreeSHAP computes them exactly for trees.
 
@@ -115,12 +115,12 @@ Read it top to bottom: settings → small helpers → one function per stage →
   - `features()` computes the 18 features once and caches them as a parquet file, since the GPT-2 step is the slow part.
   - `models()` and `bert()` load saved models once (`@cache`).
   - [`score_all`](../run_pipeline.py#L128) returns every model's score and threshold, so all test sets are scored the same way. The app's verdict is `(p_xgb + p_lr) / 2`.
-- **Stages:** `stage_data` → `stage_features` → `stage_train` → `stage_bert` → `stage_evaluate` → `stage_ood` → `stage_paraphrase` → `stage_explain`. The [`STAGES`](../run_pipeline.py#L402) table maps names to functions, and `--stages` picks which to run.
-- **Outputs:** every result table goes to `reports/`, and `write_summary` collects them into `reports/RESULTS.md`.
+- **Stages:** `stage_data` → `stage_features` → `stage_train` → `stage_bert` → `stage_evaluate` → `stage_ood` → `stage_paraphrase` → `stage_explain`. The [`STAGES`](../run_pipeline.py#L407) table maps names to functions, and `--stages` picks which to run.
+- **Outputs:** every result table goes to `reports/`, and `write_summary` collects them into `reports/RESULTS.md`. `stage_features` also writes `models/feature_stats.json`, the per-class training medians that the website shows as "typical human / typical AI".
 
 ## 6. Using the models: [`src/detector.py`](../src/detector.py)
 
-`Detector.__init__` loads the two saved models, the feature names and GPT-2 once. [`analyze(text)`](../src/detector.py#L21) then:
+`Detector.__init__` loads the two saved models, the feature names and GPT-2 once. [`analyze(text)`](../src/detector.py#L22) then:
 1. Computes the 18 features.
 2. `p_style` = XGBoost's P(AI), and `p_words` = the LR model's P(AI).
 3. Computes the SHAP values for this one text (the reasons).
@@ -130,12 +130,12 @@ Read it top to bottom: settings → small helpers → one function per stage →
 
 | Part | Why |
 |---|---|
-| [`guard`](../server.py#L76) middleware | runs on every request: requires `Content-Length` and caps the body at 64 KB, applies the rate limit, adds security headers (CSP, frame and sniffing protection) and cache rules |
-| [`rate_limited`](../server.py#L61) | sliding window: at most 20 analyses per IP per minute (behind a proxy, `client_ip` trusts only the address the proxy added, so it cannot be faked) |
+| [`guard`](../server.py#L77) middleware | runs on every request: requires `Content-Length` and caps the body at 64 KB, applies the rate limit, adds security headers (CSP, frame and sniffing protection) and cache rules |
+| [`rate_limited`](../server.py#L62) | sliding window: at most 20 analyses per IP per minute (behind a proxy, `client_ip` trusts only the address the proxy added, so it cannot be faked) |
 | `invalid_request` handler | short error messages that never echo the user's text |
-| [`clean`](../server.py#L168) | strips invisible characters (zero-width spaces, null bytes), a known trick to fool detectors |
-| [`check_prose`](../server.py#L176) | refuses text that isn't English prose instead of giving a meaningless verdict |
-| [`analyze`](../server.py#L192) | clean → check → wait for the model (503 if busy) → `Detector.analyze` → verdict band: ≥ 0.65 AI, ≤ 0.35 human, else unclear |
+| [`clean`](../server.py#L170) | strips invisible characters (zero-width spaces, null bytes), a known trick to fool detectors |
+| [`check_prose`](../server.py#L178) | refuses text that isn't English prose instead of giving a meaningless verdict |
+| [`analyze`](../server.py#L194) | clean → check → wait for the model (503 if busy) → `Detector.analyze` → verdict band: ≥ 0.65 AI, ≤ 0.35 human, else unclear |
 | `/api/meta` | the examples and the result tables from `reports/`, so the website never hard-codes a number |
 | `site` | serves the built website; unknown pages get a real 404; fills the site's own address into `index.html`, `sitemap.xml` and `robots.txt` |
 

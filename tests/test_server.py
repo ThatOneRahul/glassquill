@@ -143,7 +143,7 @@ def test_cache_headers():
     assert client.get("/api/meta").headers["cache-control"] == "no-store"
 
 
-def test_rate_table_forgets_idle_ips(monkeypatch):
+def test_rate_table_forgets_idle_ips():
     server.hits.clear()
     server.hits["203.0.113.9"].append(0.0)              # last seen long ago
     server.rate_limited("198.51.100.1")
@@ -184,12 +184,20 @@ def test_site_routes_and_404():
 
 @pytest.mark.skipif(not server.DIST.exists(), reason="run `npm run build` in web/ first")
 def test_site_url_filled_in_for_any_host(monkeypatch):
+    monkeypatch.setattr(server, "TRUST_PROXY", True)
     proxied = {"X-Forwarded-Proto": "https"}
     assert "<loc>https://testserver/detect</loc>" in client.get("/sitemap.xml", headers=proxied).text
     assert 'href="https://testserver/"' in client.get("/", headers=proxied).text
     monkeypatch.setattr(server, "SITE_URL", "https://glassquill.example")
     assert "Sitemap: https://glassquill.example/sitemap.xml" in client.get("/robots.txt").text
     assert "%SITE_URL%" not in client.get("/no-such-page").text
+
+
+@pytest.mark.skipif(not server.DIST.exists(), reason="run `npm run build` in web/ first")
+def test_forwarded_proto_cannot_inject_markup(monkeypatch):
+    monkeypatch.setattr(server, "TRUST_PROXY", True)
+    page = client.get("/", headers={"X-Forwarded-Proto": '"><script>x()</script>'}).text
+    assert "<script>x()" not in page and 'href="http://testserver/"' in page
 
 
 @pytest.mark.skipif(not server.DIST.exists(), reason="needs web/dist")

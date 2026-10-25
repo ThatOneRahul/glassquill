@@ -138,7 +138,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           )}
         </AnimatePresence>
       </header>
-      <main id="main">{children}</main>
+      <main id="main" tabIndex={-1} className="outline-none">{children}</main>
       <Footer />
     </div>
   );

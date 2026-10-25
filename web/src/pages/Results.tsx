@@ -23,6 +23,7 @@ export default function Results() {
   const [set, setSet] = useState<SetKey>("in_domain");
   const rows = meta?.results[set] ?? [];
   const app = rows.find((r) => r.model === APP_MODEL);
+  const top = best(rows);
 
   return (
     <>
@@ -101,7 +102,7 @@ export default function Results() {
                   </thead>
                   <tbody>
                     {rows.map((r, i) => (
-                      <ModelRow key={String(r.model)} r={r} i={i} paraphrase={set === "paraphrase"} best={best(rows)} />
+                      <ModelRow key={String(r.model)} r={r} i={i} paraphrase={set === "paraphrase"} best={top} />
                     ))}
                   </tbody>
                 </motion.table>

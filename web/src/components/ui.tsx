@@ -171,8 +171,11 @@ export function RevealGroup({
 
 /* ---------------- numbers and bars ---------------- */
 
-/** Counts up from 0 when scrolled into view. `format` turns the number into text. */
-export function CountUp({ value, format = (v) => v.toFixed(0), className }: {
+const wholeNumber = (v: number) => v.toFixed(0);
+
+/** Counts up from 0 when scrolled into view. `format` turns the number into text; pass a
+ *  stable function (defined outside the component), or the count restarts on re-render. */
+export function CountUp({ value, format = wholeNumber, className }: {
   value: number;
   format?: (v: number) => string;
   className?: string;

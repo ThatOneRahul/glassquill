@@ -84,8 +84,8 @@ export default function Detect() {
     setHint(null);
   }
 
-  async function copyResult() {
-    if (!result) return;
+  async function copyResult(): Promise<boolean> {
+    if (!result) return false;
     const top = result.contributions.slice(0, 3).map((c) => `- ${c.name}: ${fmtFeature(c.feature, c.value)} (pushes towards ${c.shap > 0 ? "AI" : "human"})`);
     const summary = [
       `GlassQuill: ${VERDICT[result.verdict].title} (${Math.round(result.p_final * 100)}% AI)`,
@@ -96,8 +96,10 @@ export default function Detect() {
     try {
       await navigator.clipboard.writeText(summary);
       setToast({ msg: "Result copied to clipboard.", tone: "ok" });
+      return true;
     } catch {
       setToast({ msg: "Copy failed: clipboard access is blocked.", tone: "error" });
+      return false;
     }
   }
 
@@ -278,7 +280,7 @@ function IconButton({ label, onClick, disabled, children }: { label: string; onC
   );
 }
 
-function VerdictView({ r, onCopy, stale }: { r: Analysis; onCopy: () => void; stale: boolean }) {
+function VerdictView({ r, onCopy, stale }: { r: Analysis; onCopy: () => Promise<boolean>; stale: boolean }) {
   const v = VERDICT[r.verdict];
   const [copied, setCopied] = useState(false);
   return (
@@ -330,8 +332,8 @@ function VerdictView({ r, onCopy, stale }: { r: Analysis; onCopy: () => void; st
           className="h-9 px-4 text-xs"
           done={copied}
           icon={<Copy className="size-3.5" aria-hidden="true" />}
-          onClick={() => {
-            onCopy();
+          onClick={async () => {
+            if (!(await onCopy())) return;
             setCopied(true);
             setTimeout(() => setCopied(false), 1800);
           }}

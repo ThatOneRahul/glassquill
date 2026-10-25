@@ -49,12 +49,13 @@ def plain_reasons(sv_row, top_k=3):
     return "\n".join(lines)
 
 
-def lr_word_weights(pipe, text):
-    """Contribution of each word in the text for the TF-IDF + LR model."""
+def lr_word_weights(pipe, text, vocab=None):
+    """Contribution of each word in the text for the TF-IDF + LR model. Pass `vocab`
+    (vec.get_feature_names_out()) when calling repeatedly: building it takes ~75 ms."""
     vec = pipe.named_steps["tfidfvectorizer"]
     lr = pipe.named_steps["logisticregression"]
     x = vec.transform([text]).multiply(lr.coef_[0]).tocsr()
-    vocab = vec.get_feature_names_out()
+    vocab = vec.get_feature_names_out() if vocab is None else vocab
     return {vocab[j]: v for j, v in zip(x.indices, x.data)}
 
 

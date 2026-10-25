@@ -13,6 +13,7 @@ class Detector:
     def __init__(self, model_dir="models", device=None):
         self.xgb = joblib.load(f"{model_dir}/xgb.joblib")          # style model
         self.lr = joblib.load(f"{model_dir}/tfidf_lr.joblib")      # word model
+        self.vocab = self.lr.named_steps["tfidfvectorizer"].get_feature_names_out()
         with open(f"{model_dir}/feature_names.json") as f:
             self.feature_names = json.load(f)
         self.explainer = shap.TreeExplainer(self.xgb)
@@ -39,5 +40,5 @@ class Detector:
             "p_ai_lr": p_words,
             "shap_base": float(sv.base_values),   # log-odds; base + sum of SHAP values = output
             "contributions": contributions,
-            "highlights": highlight(text, lr_word_weights(self.lr, text)),
+            "highlights": highlight(text, lr_word_weights(self.lr, text, self.vocab)),
         }

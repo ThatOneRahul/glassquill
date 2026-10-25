@@ -173,9 +173,10 @@ def stage_data():
     for name, d in [("train", train), ("val", val), ("test", test)]:
         d.to_parquet(path(DATA, f"{name}.parquet"))
         print(f"  {name}: {len(d)} texts, share AI {d['label'].mean():.3f}")
-        for stale in [f"X_{name}.parquet"]:           # a new split makes old features stale
-            if os.path.exists(path(DATA, stale)):
-                os.remove(path(DATA, stale))
+    # a new split makes every cached feature table and the paraphrased test texts stale
+    for stale in ["X_train", "X_val", "X_test", "X_para_before", "X_para_after", "paraphrased"]:
+        if os.path.exists(path(DATA, f"{stale}.parquet")):
+            os.remove(path(DATA, f"{stale}.parquet"))
 
     # exploratory analysis: texts per source and class, and text lengths
     df = pd.concat([train, val, test])
@@ -194,6 +195,10 @@ def stage_features():
         features(name, split(name)["text"])
     X, y = features("train", None), split("train")["label"].values
     json.dump(list(X.columns), open(path(MODELS, "feature_names.json"), "w"))
+    # the "typical human / typical AI" values the website shows next to each feature
+    typical = X.groupby(y).median().T.round(4)
+    json.dump({f: {"human": r[0], "ai": r[1]} for f, r in typical.iterrows()},
+              open(path(MODELS, "feature_stats.json"), "w"), indent=1)
     means = X.groupby(y).mean().T
     means.columns = ["human_mean", "ai_mean"]
     means.index.name = "feature"

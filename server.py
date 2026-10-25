@@ -13,6 +13,7 @@ import threading
 import unicodedata
 import time
 from collections import defaultdict, deque
+from functools import cache
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -144,6 +145,7 @@ def health():
 
 
 @app.get("/api/meta")
+@cache                                                  # the reports don't change while running
 def meta():
     """Examples, typical feature values and the real evaluation results for the site."""
     return {
@@ -219,7 +221,10 @@ if DIST.exists():
     def with_site_url(file: Path, request: Request, status: int = 200) -> Response:
         """index.html, sitemap.xml and robots.txt are built with a %SITE_URL% placeholder,
         filled in here, so one build works on any host."""
-        base = SITE_URL or f"{request.headers.get('x-forwarded-proto', request.url.scheme)}://{request.url.netloc}"
+        # only a trusted proxy may set the scheme, and only to http/https: the value lands in
+        # the page (Starlette already rejects malformed Host headers)
+        proto = request.headers.get("x-forwarded-proto") if TRUST_PROXY else None
+        base = SITE_URL or f"{proto if proto in ('http', 'https') else request.url.scheme}://{request.url.netloc}"
         media = {".html": "text/html", ".xml": "application/xml", ".txt": "text/plain"}[file.suffix]
         return Response(file.read_text(encoding="utf-8").replace("%SITE_URL%", base),
                         status_code=status, media_type=media)
