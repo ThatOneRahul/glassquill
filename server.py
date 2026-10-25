@@ -18,7 +18,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -34,6 +34,7 @@ UNSURE = (0.35, 0.65)                                       # band where the ver
 PAGES = {"/", "/detect", "/results", "/method"}             # routes the React app owns
 
 TRUST_PROXY = os.getenv("GLASSQUILL_TRUST_PROXY") == "1"     # behind nginx etc.: use X-Forwarded-For
+SITE_URL = os.getenv("SITE_URL", "").rstrip("/")           # public address; default: the one visited
 BUSY_WAIT = 20                                              # seconds a request may wait for the model
 
 det = Detector(str(MODELS))
@@ -50,8 +51,10 @@ hits = defaultdict(deque)
 
 
 def client_ip(request: Request) -> str:
+    # The last entry is the one our proxy added; earlier entries come from the visitor and
+    # could be faked to dodge the rate limit.
     if TRUST_PROXY and (fwd := request.headers.get("x-forwarded-for")):
-        return fwd.split(",")[0].strip()
+        return fwd.split(",")[-1].strip()
     return request.client.host if request.client else "?"
 
 
@@ -213,16 +216,26 @@ def analyze(body: AnalyzeIn):
 if DIST.exists():
     app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
 
+    def with_site_url(file: Path, request: Request, status: int = 200) -> Response:
+        """index.html, sitemap.xml and robots.txt are built with a %SITE_URL% placeholder,
+        filled in here, so one build works on any host."""
+        base = SITE_URL or f"{request.headers.get('x-forwarded-proto', request.url.scheme)}://{request.url.netloc}"
+        media = {".html": "text/html", ".xml": "application/xml", ".txt": "text/plain"}[file.suffix]
+        return Response(file.read_text(encoding="utf-8").replace("%SITE_URL%", base),
+                        status_code=status, media_type=media)
+
     @app.api_route("/{path:path}", methods=["GET", "HEAD"], include_in_schema=False)
-    def site(path: str):
+    def site(path: str, request: Request):
         target = (DIST / path).resolve()
         if path and target.is_file() and DIST.resolve() in target.parents:   # no path escape
+            if target.name in ("index.html", "sitemap.xml", "robots.txt"):
+                return with_site_url(target, request)
             return FileResponse(target)
         if path.startswith("api/"):
             raise HTTPException(404, "Unknown API route.")
         # unknown pages still get the app (it renders its 404 page) but with a real 404 status
         status = 200 if "/" + path.rstrip("/") in PAGES or path == "" else 404
-        return FileResponse(DIST / "index.html", status_code=status)
+        return with_site_url(DIST / "index.html", request, status)
 
 
 if __name__ == "__main__":

@@ -159,6 +159,17 @@ def test_rate_limit(monkeypatch):
     server.hits.clear()
 
 
+def test_faked_forwarded_for_cannot_dodge_rate_limit(monkeypatch):
+    monkeypatch.setattr(server, "RATE", (2, 60))
+    monkeypatch.setattr(server, "TRUST_PROXY", True)
+    server.hits.clear()
+    codes = [client.post("/api/analyze", json={"text": "x"},
+                         headers={"X-Forwarded-For": f"10.0.0.{i}, 203.0.113.7"}).status_code
+             for i in range(3)]
+    assert codes == [422, 422, 429]
+    server.hits.clear()
+
+
 @pytest.mark.skipif(not server.DIST.exists(), reason="run `npm run build` in web/ first")
 def test_site_routes_and_404():
     for page in ["/", "/detect", "/results", "/method"]:
@@ -169,6 +180,16 @@ def test_site_routes_and_404():
     for f in ["/favicon.ico", "/favicon.svg", "/robots.txt", "/sitemap.xml", "/site.webmanifest"]:
         assert client.get(f).status_code == 200, f
     assert "Sitemap:" in client.get("/robots.txt").text
+
+
+@pytest.mark.skipif(not server.DIST.exists(), reason="run `npm run build` in web/ first")
+def test_site_url_filled_in_for_any_host(monkeypatch):
+    proxied = {"X-Forwarded-Proto": "https"}
+    assert "<loc>https://testserver/detect</loc>" in client.get("/sitemap.xml", headers=proxied).text
+    assert 'href="https://testserver/"' in client.get("/", headers=proxied).text
+    monkeypatch.setattr(server, "SITE_URL", "https://glassquill.example")
+    assert "Sitemap: https://glassquill.example/sitemap.xml" in client.get("/robots.txt").text
+    assert "%SITE_URL%" not in client.get("/no-such-page").text
 
 
 @pytest.mark.skipif(not server.DIST.exists(), reason="needs web/dist")

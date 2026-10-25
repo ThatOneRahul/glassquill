@@ -28,6 +28,8 @@ On 4,829 test texts the model never saw (HC3 + HAP-E + M4GT, split by question o
 
 ## Run it
 
+You need Python 3.11 and Node.js 20 or newer. An NVIDIA GPU is optional: the website runs on the CPU in about 2 seconds per text.
+
 ```bash
 python -m venv .venv
 .venv/Scripts/activate                 # macOS/Linux: source .venv/bin/activate
@@ -89,7 +91,7 @@ docs/                report, code walkthrough, viva sheet, original project guid
 python run_pipeline.py --quick      # every stage on a small sample, about 10 minutes
 python run_pipeline.py              # the full study, about 1.5 hours on a laptop GPU
 python run_pipeline.py --stages evaluate ood paraphrase explain   # results only, reuses saved work
-python -m pytest tests -q           # 25 API tests
+python -m pytest tests -q           # 27 API tests
 ```
 
 Datasets download automatically on first run. Every stage saves its output, so any stage can be rerun on its own. The seed is fixed at 42, so a rerun gives the same numbers.
@@ -116,8 +118,6 @@ Pasted text is never stored or logged. The API (`server.py`):
 - sends strict security headers
 
 Each of these has a test in `tests/test_server.py`.
-
-For deployment, set `SITE_URL` when building the website (`SITE_URL=https://your-domain npm run build`). If the server sits behind a reverse proxy, also set `GLASSQUILL_TRUST_PROXY=1`, so the rate limit sees each visitor's real IP.
 
 ## Limits
 

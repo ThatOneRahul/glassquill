@@ -70,7 +70,7 @@ SHAP has theory behind it and adds up exactly. LIME perturbs the text and fits a
 On the test set the app verdict gets 97.4% accuracy, 0.974 F1, 0.995 ROC-AUC and 2.0% FPR. DistilBERT gets 96.1% and 7.1% FPR.
 
 **Q. Why does performance drop on MAGE?**
-MAGE has 27 generators and 14 domains we never trained on. We still catch GPT-4 (90%) and GPT-3.5 (80%). Small base models (OPT, BLOOM, GPT-J) sample "surprising" words, so their perplexity looks human, and nearly all detectors miss them.
+MAGE has 27 generators and 14 domains we never trained on. We still catch GPT-4 (91%) and GPT-3.5 (80%). Small base models (OPT, BLOOM, GPT-J) sample "surprising" words, so their perplexity looks human, and nearly all detectors miss them.
 
 **Q. How can someone fool the detector?**
 Paraphrasing (we measured the recall drop), mixing human and AI sentences, asking the LLM to write casually, or adding typos.

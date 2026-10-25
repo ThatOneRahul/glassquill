@@ -1,8 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 
-declare const __SITE_URL__: string;
-
 function setMeta(selector: string, attr: "content" | "href", value: string) {
   const el = document.head.querySelector<HTMLMetaElement | HTMLLinkElement>(selector);
   if (el) el.setAttribute(attr, value);
@@ -13,7 +11,7 @@ export function Seo({ title, description, noindex = false }: { title: string; de
   const { pathname } = useLocation();
   useEffect(() => {
     const full = title === "GlassQuill" ? title : `${title} · GlassQuill`;
-    const url = `${__SITE_URL__}${pathname}`;
+    const url = `${window.location.origin}${pathname}`;
     document.title = full;
     setMeta('meta[name="description"]', "content", description);
     setMeta('link[rel="canonical"]', "href", url);

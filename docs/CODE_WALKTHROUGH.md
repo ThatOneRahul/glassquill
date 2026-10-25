@@ -25,14 +25,14 @@ Two programs, one shared library (`src/`):
 |---|---|---|
 | `src/data.py` | loading, cleaning, balancing, splitting | 170 |
 | `src/features.py` | the 18 features (GPT-2 + writing style) | 84 |
-| `src/models.py` | perplexity threshold, TF-IDF + LR, XGBoost, metrics | 70 |
+| `src/models.py` | perplexity threshold, TF-IDF + LR, XGBoost, metrics | 74 |
 | `src/train_distilbert.py` | DistilBERT fine-tuning | 54 |
 | `src/explain.py` | SHAP, LIME, word weights | 75 |
 | `src/robustness.py` | the T5 paraphraser for the robustness test | 23 |
 | `src/detector.py` | analyse one text with the saved models | 43 |
 | `run_pipeline.py` | the whole study, one function per stage | ~430 |
-| `server.py` | the web API and its security | ~230 |
-| `tests/test_server.py` | 25 automatic checks of the API | |
+| `server.py` | the web API and its security | ~240 |
+| `tests/test_server.py` | 27 automatic checks of the API | |
 | `web/src/` | the website (React) | |
 
 ---
@@ -82,14 +82,14 @@ Two programs, one shared library (`src/`):
 
 | Function | Model | Key lines |
 |---|---|---|
-| [`perplexity_threshold`](../src/models.py#L25) | 1. Perplexity threshold | `roc_curve` on validation, pick the cut-off where TPR − FPR is highest (**Youden's J**) |
-| [`train_tfidf_lr`](../src/models.py#L33) | 2. TF-IDF + logistic regression | `TfidfVectorizer(ngram_range=(1, 2))` + `LogisticRegression`, `GridSearchCV` over C ∈ {0.1, 1, 10} |
-| [`train_xgb`](../src/models.py#L60) | 3. XGBoost | 400 trees, `GridSearchCV` over depth {3, 4, 6} × learning rate {0.05, 0.1}, **monotone constraints** |
-| [`evaluate`](../src/models.py#L12) | metrics for any model | accuracy, precision, recall, F1, ROC-AUC, **FPR** = fp / (fp + tn) |
+| [`perplexity_threshold`](../src/models.py#L29) | 1. Perplexity threshold | `roc_curve` on validation, pick the cut-off where TPR − FPR is highest (**Youden's J**) |
+| [`train_tfidf_lr`](../src/models.py#L37) | 2. TF-IDF + logistic regression | `TfidfVectorizer(ngram_range=(1, 2))` + `LogisticRegression`, `GridSearchCV` over C ∈ {0.1, 1, 10} |
+| [`train_xgb`](../src/models.py#L64) | 3. XGBoost | 400 trees, `GridSearchCV` over depth {3, 4, 6} × learning rate {0.05, 0.1}, **monotone constraints** |
+| [`evaluate`](../src/models.py#L16) | metrics for any model | accuracy, precision, recall, F1, ROC-AUC, **FPR** = fp / (fp + tn) |
 
 Both grid searches use `GroupKFold(n_splits=5)` with `groups=qid`, so the validation folds are leak-free too, and they score on F1.
 
-[`monotone_directions`](../src/models.py#L50) compares the class means on the training data with `EXPECTED_DIRECTION` (from theory, e.g. lower burstiness → AI). Only features where both agree get a constraint, and XGBoost then cannot learn the opposite rule.
+[`monotone_directions`](../src/models.py#L54) compares the class means on the training data with `EXPECTED_DIRECTION` (from theory, e.g. lower burstiness → AI). Only features where both agree get a constraint, and XGBoost then cannot learn the opposite rule.
 
 [`src/train_distilbert.py`](../src/train_distilbert.py), model 4: the Hugging Face `Trainer` fine-tunes `distilbert-base-uncased` with a 2-class head (lr 2e-5, batch 16, 2 epochs, 256 tokens). `load_best_model_at_end=True` with `metric_for_best_model="f1"` keeps the best epoch on validation. [`predict_proba`](../src/train_distilbert.py#L46) returns `[P(human), P(AI)]` per text, which is also the format LIME needs.
 
@@ -130,14 +130,14 @@ Read it top to bottom: settings → small helpers → one function per stage →
 
 | Part | Why |
 |---|---|
-| [`guard`](../server.py#L73) middleware | runs on every request: requires `Content-Length` and caps the body at 64 KB, applies the rate limit, adds security headers (CSP, frame and sniffing protection) and cache rules |
-| [`rate_limited`](../server.py#L58) | sliding window: at most 20 analyses per IP per minute |
+| [`guard`](../server.py#L76) middleware | runs on every request: requires `Content-Length` and caps the body at 64 KB, applies the rate limit, adds security headers (CSP, frame and sniffing protection) and cache rules |
+| [`rate_limited`](../server.py#L61) | sliding window: at most 20 analyses per IP per minute (behind a proxy, `client_ip` trusts only the address the proxy added, so it cannot be faked) |
 | `invalid_request` handler | short error messages that never echo the user's text |
-| [`clean`](../server.py#L165) | strips invisible characters (zero-width spaces, null bytes), a known trick to fool detectors |
-| [`check_prose`](../server.py#L173) | refuses text that isn't English prose instead of giving a meaningless verdict |
-| [`analyze`](../server.py#L189) | clean → check → wait for the model (503 if busy) → `Detector.analyze` → verdict band: ≥ 0.65 AI, ≤ 0.35 human, else unclear |
+| [`clean`](../server.py#L168) | strips invisible characters (zero-width spaces, null bytes), a known trick to fool detectors |
+| [`check_prose`](../server.py#L176) | refuses text that isn't English prose instead of giving a meaningless verdict |
+| [`analyze`](../server.py#L192) | clean → check → wait for the model (503 if busy) → `Detector.analyze` → verdict band: ≥ 0.65 AI, ≤ 0.35 human, else unclear |
 | `/api/meta` | the examples and the result tables from `reports/`, so the website never hard-codes a number |
-| `site` | serves the built website; unknown pages get a real 404 |
+| `site` | serves the built website; unknown pages get a real 404; fills the site's own address into `index.html`, `sitemap.xml` and `robots.txt` |
 
 ## 8. The website: [`web/src/`](../web/src)
 
@@ -156,7 +156,7 @@ The website only displays what the server returns, and every number on it comes 
 
 Run them with `python -m pytest tests -q`. They check:
 - **validation:** too short, too long, wrong type, not English
-- **security:** body cap, chunked bodies, rate limit, headers, no path traversal
+- **security:** body cap, chunked bodies, rate limit (including a faked `X-Forwarded-For`), headers, no path traversal
 - **behaviour:** a real AI text is flagged and a real human text is not, and invisible characters do not change the verdict
 
 ---

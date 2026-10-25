@@ -2,9 +2,10 @@ import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-// Absolute URL the site is served from. Set SITE_URL when deploying; canonical links,
-// Open Graph tags, sitemap.xml and robots.txt are all built from it.
-const SITE = (process.env.SITE_URL ?? "http://127.0.0.1:8000").replace(/\/$/, "");
+// Canonical links, Open Graph tags, sitemap.xml and robots.txt need the site's absolute URL.
+// By default they keep a %SITE_URL% placeholder that server.py fills in, so one build works
+// on any host; set SITE_URL only to host the files somewhere else.
+const SITE = process.env.SITE_URL?.replace(/\/$/, "") ?? "%SITE_URL%";
 const PAGES = ["/", "/detect", "/results", "/method"];
 
 function seoFiles(): Plugin {
@@ -32,7 +33,6 @@ function seoFiles(): Plugin {
 
 export default defineConfig({
   plugins: [react(), tailwindcss(), seoFiles()],
-  define: { __SITE_URL__: JSON.stringify(SITE) },
   server: { proxy: { "/api": "http://127.0.0.1:8000" } },
   build: { target: "es2020", cssCodeSplit: true },
 });
