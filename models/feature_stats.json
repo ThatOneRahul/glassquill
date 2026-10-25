@@ -1,0 +1,74 @@
+{
+ "avg_sent_len": {
+  "human": 20.025,
+  "ai": 21.1667
+ },
+ "std_sent_len": {
+  "human": 9.5924,
+  "ai": 6.907
+ },
+ "burstiness": {
+  "human": 0.5093,
+  "ai": 0.3442
+ },
+ "type_token_ratio": {
+  "human": 0.5686,
+  "ai": 0.5204
+ },
+ "avg_word_len": {
+  "human": 4.5684,
+  "ai": 4.7817
+ },
+ "comma_rate": {
+  "human": 0.0481,
+  "ai": 0.0546
+ },
+ "punct_rate": {
+  "human": 0.1697,
+  "ai": 0.1399
+ },
+ "function_word_rate": {
+  "human": 0.2764,
+  "ai": 0.299
+ },
+ "first_person_rate": {
+  "human": 0.0058,
+  "ai": 0.0
+ },
+ "contraction_rate": {
+  "human": 0.0126,
+  "ai": 0.0075
+ },
+ "flesch_reading_ease": {
+  "human": 59.9863,
+  "ai": 51.1919
+ },
+ "fk_grade": {
+  "human": 9.7468,
+  "ai": 11.417
+ },
+ "log_ppl": {
+  "human": 3.5419,
+  "ai": 2.5006
+ },
+ "nll_std": {
+  "human": 2.8979,
+  "ai": 2.3175
+ },
+ "nll_max": {
+  "human": 13.6083,
+  "ai": 11.6363
+ },
+ "top1_frac": {
+  "human": 0.3412,
+  "ai": 0.4667
+ },
+ "top10_frac": {
+  "human": 0.6667,
+  "ai": 0.8078
+ },
+ "mean_entropy": {
+  "human": 3.6998,
+  "ai": 3.2446
+ }
+}

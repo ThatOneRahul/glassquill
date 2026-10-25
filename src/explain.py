@@ -29,7 +29,10 @@ def shap_global(model, X, out_path="reports/figures/shap_beeswarm.png"):
 def shap_local_figure(explainer, x_row):
     """Waterfall plot for one text. x_row is a one-row DataFrame."""
     sv = explainer(x_row)
-    shap.plots.waterfall(sv[0], max_display=10, show=False)
+    shown = shap.Explanation(                       # readable names on the plot only
+        values=sv[0].values, base_values=sv[0].base_values, data=sv[0].data,
+        feature_names=[NICE_NAMES.get(n, n) for n in sv[0].feature_names])
+    shap.plots.waterfall(shown, max_display=10, show=False)
     fig = plt.gcf(); fig.set_size_inches(8, 5); plt.tight_layout()
     return fig, sv[0]
 
