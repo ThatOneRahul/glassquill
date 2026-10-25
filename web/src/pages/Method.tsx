@@ -62,14 +62,14 @@ export default function Method() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.4 }}
                 transition={{ duration: 0.5, ease: ease.out, delay: (i % 3) * 0.08 }}
-                className="relative rounded-2xl bg-canvas/70 p-5 dark:bg-white/[0.04]"
+                className="relative rounded-2xl p-5 bg-white/[0.04]"
               >
                 <div className="flex items-center gap-3">
                   <span className="num text-xs font-bold text-flame">0{i + 1}</span>
-                  <s.icon className="size-5 text-violet dark:text-lavender" aria-hidden="true" />
+                  <s.icon className="size-5 text-lavender" aria-hidden="true" />
                 </div>
                 <h3 className="mt-3 font-semibold">{s.title}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-ink/60 dark:text-white/55">{s.body}</p>
+                <p className="mt-1 text-sm leading-relaxed text-white/55">{s.body}</p>
               </motion.li>
             ))}
           </ol>
@@ -81,11 +81,11 @@ export default function Method() {
           <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={group(0.07)} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {DATA.map((d) => (
               <motion.article key={d.name} variants={pop} whileHover={lift} className="card p-5">
-                <p className="text-xs font-semibold text-ink/45 dark:text-white/55">Dataset</p>
+                <p className="text-xs font-semibold text-white/55">Dataset</p>
                 <h3 className="text-xl font-bold">{d.name}</h3>
                 <p className="mt-3 text-sm font-medium">{d.who}</p>
-                <p className="mt-1 text-sm text-ink/55 dark:text-white/50">{d.where}</p>
-                <p className="mt-4 inline-block rounded-full bg-lavender-soft px-2.5 py-0.5 text-[11px] font-semibold text-violet dark:bg-violet/15 dark:text-lavender">{d.licence}</p>
+                <p className="mt-1 text-sm text-white/50">{d.where}</p>
+                <p className="mt-4 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold bg-violet/15 text-lavender">{d.licence}</p>
               </motion.article>
             ))}
           </motion.div>
@@ -94,19 +94,19 @@ export default function Method() {
         {/* features */}
         <motion.section id="features" variants={pop} className="card scroll-mt-24 p-5 sm:p-8" aria-labelledby="feat-h">
           <h2 id="feat-h" className="font-semibold">The 18 features the style model reads</h2>
-          <p className="text-xs text-ink/50 dark:text-white/55">Median value in the training set for human and AI texts</p>
+          <p className="text-xs text-white/55">Median value in the training set for human and AI texts</p>
           <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {FEATURE_GROUPS.map(([g, feats]) => (
               <div key={g}>
                 <h3 className="text-xs font-bold tracking-wider text-flame uppercase">{g}</h3>
-                <ul className="mt-2 divide-y divide-line dark:divide-white/10">
+                <ul className="mt-2 divide-y divide-white/10">
                   {feats.map((f) => {
                     const t = meta?.typical[f];
                     return (
                       <li key={f} className="flex items-center justify-between gap-3 py-2 text-sm">
                         <code className="font-mono text-xs">{f}</code>
                         {t ? (
-                          <span className="num text-xs text-ink/60 dark:text-white/55">
+                          <span className="num text-xs text-white/55">
                             <span className="text-human">{fmtFeature(f, t.human)}</span> · <span className="text-ai">{fmtFeature(f, t.ai)}</span>
                           </span>
                         ) : (
@@ -119,11 +119,11 @@ export default function Method() {
               </div>
             ))}
           </div>
-          <p className="mt-4 text-xs text-ink/50 dark:text-white/55"><span className="text-human">green</span> = typical human · <span className="text-ai">rose</span> = typical AI</p>
+          <p className="mt-4 text-xs text-white/55"><span className="text-human">green</span> = typical human · <span className="text-ai">rose</span> = typical AI</p>
         </motion.section>
 
         {/* limits */}
-        <motion.section id="limits" variants={pop} className="scroll-mt-24 overflow-hidden rounded-[var(--radius-card)] bg-ink p-6 text-white sm:p-8 dark:ring-1 dark:ring-white/10" aria-labelledby="lim-h">
+        <motion.section id="limits" variants={pop} className="scroll-mt-24 overflow-hidden rounded-[var(--radius-card)] bg-ink p-6 text-white sm:p-8 ring-1 ring-white/10" aria-labelledby="lim-h">
           <p className="eyebrow">Limits and ethics</p>
           <h2 id="lim-h" className="mt-2 text-2xl font-bold tracking-tight">What GlassQuill cannot do</h2>
           <motion.ul initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={group(0.06)} className="mt-5 grid gap-3 md:grid-cols-2">

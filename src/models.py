@@ -8,6 +8,10 @@ from sklearn.model_selection import GridSearchCV, GroupKFold
 from sklearn.pipeline import make_pipeline
 from xgboost import XGBClassifier
 
+# Parallel grid-search workers. Each worker holds its own copy of the data, so "all cores"
+# (n_jobs=-1) can run a laptop out of memory; 4 is a safe default.
+N_JOBS = 4
+
 
 def evaluate(name, y_true, score, threshold=0.5):
     pred = (np.asarray(score) >= threshold).astype(int)
@@ -35,7 +39,7 @@ def train_tfidf_lr(train, seed=42):
         TfidfVectorizer(ngram_range=(1, 2), min_df=3, max_features=50000, sublinear_tf=True),
         LogisticRegression(max_iter=2000, random_state=seed))
     grid = GridSearchCV(pipe, {"logisticregression__C": [0.1, 1, 10]},
-                        cv=GroupKFold(n_splits=5), scoring="f1", n_jobs=-1)
+                        cv=GroupKFold(n_splits=5), scoring="f1", n_jobs=N_JOBS)
     grid.fit(train["text"], train["label"], groups=train["qid"])
     print("best C:", grid.best_params_)
     return grid.best_estimator_
@@ -64,7 +68,7 @@ def train_xgb(X_train, y_train, groups, seed=42, monotone=True):
                          eval_metric="logloss", random_state=seed,
                          monotone_constraints=cons or None)
     grid = GridSearchCV(base, {"max_depth": [3, 4, 6], "learning_rate": [0.05, 0.1]},
-                        cv=GroupKFold(n_splits=5), scoring="f1", n_jobs=-1)
+                        cv=GroupKFold(n_splits=5), scoring="f1", n_jobs=N_JOBS)
     grid.fit(X_train, y_train, groups=groups)
     print("best params:", grid.best_params_)
     return grid.best_estimator_

@@ -89,7 +89,7 @@ export default function Home() {
               picks its verdict rule to keep it low, while showing an <em>unclear</em> band instead of guessing.
             </p>
           </Reveal>
-          <Reveal className="card !bg-white/[0.04] p-6 !shadow-none ring-1 ring-white/10" delay={0.1}>
+          <Reveal className="card p-6" delay={0.1}>
             <h3 className="text-sm font-semibold text-white/80">Humans wrongly flagged as AI (test set)</h3>
             {app && bert ? (
               <div className="mt-6 space-y-5">
@@ -238,14 +238,14 @@ function HeroCard() {
       </div>
       <div className="mt-3 grid grid-cols-2 gap-3">
         {[["Style model", 0.98], ["Word model", 1]].map(([l, v]) => (
-          <div key={String(l)} className="card p-4">
+          <div key={String(l)} className="rounded-2xl bg-white p-4">
             <p className="text-xs text-ink/70">{l}</p>
             <p className="num mt-1 text-2xl font-bold">{Math.round(Number(v) * 100)}%</p>
             <div className="mt-3"><Bar value={Number(v)} delay={0.6} className="bg-violet" /></div>
           </div>
         ))}
       </div>
-      <ul className="card mt-3 divide-y divide-line p-2">
+      <ul className="mt-3 divide-y divide-line rounded-2xl bg-white p-2">
         {reasons.map(([n, v, t], i) => (
           <motion.li key={n} initial={{ opacity: 0, x: 12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.8 + i * 0.1, duration: 0.5, ease: ease.out }} className="flex items-center justify-between gap-3 px-3 py-2.5">
             <span className="min-w-0">

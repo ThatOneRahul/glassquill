@@ -194,7 +194,7 @@ def analyze(body: AnalyzeIn):
     if not lock.acquire(timeout=BUSY_WAIT):             # don't let a queue tie up every worker
         raise HTTPException(503, "GlassQuill is busy right now. Please try again in a moment.")
     try:
-        r = det.analyze(text, figure=False)
+        r = det.analyze(text)
     finally:
         lock.release()
     p = r["p_final"]

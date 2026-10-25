@@ -206,13 +206,15 @@ Accuracy, precision, recall, F1, ROC-AUC, **FPR**, confusion matrices and ROC cu
 | SHAP, LIME, word weights | `src/explain.py` |
 | Load models, analyse one text | `src/detector.py` |
 | Whole study, resumable, one command | `run_pipeline.py` |
-| Web app (Gradio) / Streamlit backup | `app.py`, `streamlit_app.py` |
+| Web API (validation, rate limit, security headers) + serves the site | `server.py` |
+| Website: landing, detector, results, method | `web/src/` (React) |
+| Tests | `tests/test_server.py` |
 
-**Tools:** Python 3.11, PyTorch 2.11 (CUDA), Transformers 5.20, scikit-learn 1.9, XGBoost 3.2, SHAP 0.51, LIME 0.2, Gradio 6.30. Hardware: RTX 3050 laptop GPU (4 GB).
+**Tools:** Python 3.11, PyTorch 2.11 (CUDA), Transformers 5.20, scikit-learn 1.9, XGBoost 3.2, SHAP 0.51, LIME 0.2, FastAPI; website in React, Tailwind CSS and Motion. Hardware: RTX 3050 laptop GPU (4 GB).
 
-**Reproducing:** `python run_pipeline.py --quick` runs every stage on a small sample in about 10 minutes. The full run takes about 1.5 hours, mostly GPT-2 feature extraction for 32k texts. Every stage saves its output, so any stage can be rerun alone.
+**Reproducing:** `python run_pipeline.py --quick` runs every stage on a small sample in about 10 minutes. The full run takes about 1.5 hours, mostly GPT-2 feature extraction for 32k texts. Every stage saves its output, so any stage can be rerun alone. A line-by-line guide to the code is in `docs/CODE_WALKTHROUGH.md`.
 
-**App:** paste text → GPT-2 features → XGBoost + LR → verdict, the top 3 reasons in plain words, a SHAP waterfall plot and word highlights (red = towards AI, purple = towards human). Texts under 50 words are rejected, and the disclaimer is always visible.
+**App:** paste text → the server cleans it and checks it is English prose → GPT-2 features → XGBoost + LR → verdict with an "unclear" band, the top reasons compared with typical human and AI values, a SHAP chart, coloured word evidence and all 18 features. Texts under 50 words or not in English are refused with a clear message, pasted text is never stored, and the disclaimer is always visible.
 
 ---
 

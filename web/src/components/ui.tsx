@@ -12,7 +12,7 @@ import { duration, ease, group, inView, press, rise, spring } from "../lib/motio
 
 /* ---------------- brand ---------------- */
 
-export function LogoMark({ className = "size-8" }: { className?: string }) {
+function LogoMark({ className = "size-8" }: { className?: string }) {
   const id = useId();
   return (
     <svg viewBox="0 0 64 64" className={className} aria-hidden="true">
@@ -31,11 +31,11 @@ export function LogoMark({ className = "size-8" }: { className?: string }) {
   );
 }
 
-export function Logo({ dark = true }: { dark?: boolean }) {
+export function Logo() {
   return (
     <span className="flex items-center gap-2.5">
       <LogoMark className="size-8" />
-      <span className={`text-lg font-bold tracking-tight ${dark ? "text-white" : "text-ink dark:text-white"}`}>
+      <span className="text-lg font-bold tracking-tight text-white">
         Glass<span className="text-lavender">Quill</span>
       </span>
     </span>
@@ -81,14 +81,10 @@ export function PageHeader({ eyebrow, title, accent, children, aside }: {
 
 /* ---------------- buttons ---------------- */
 
-type Tone = "black" | "violet" | "light" | "ghost" | "outline";
+type Tone = "solid" | "outline";
 const tones: Record<Tone, string> = {
-  // on dark pages the primary button is white; its hover must stay light, or dark text
-  // sits on a dark fill and the label disappears
-  black: "bg-ink text-white hover:bg-ink-2 dark:bg-white dark:text-ink dark:hover:bg-lavender-soft",
-  violet: "bg-violet text-white hover:bg-violet-deep",
-  light: "bg-white text-ink hover:bg-lavender-soft",
-  ghost: "text-current hover:bg-black/5 dark:hover:bg-white/10",
+  // white button on the dark site; its hover stays light so the dark label never disappears
+  solid: "bg-white text-ink hover:bg-lavender-soft",
   outline: "border border-current/20 text-current hover:border-current/40",
 };
 
@@ -101,7 +97,7 @@ interface ButtonProps extends Omit<HTMLMotionProps<"button">, "children"> {
 }
 
 /** Pill button with spring press, plus loading and success states that cross-fade. */
-export function Button({ tone = "black", icon, loading, done, children, className = "", disabled, ...rest }: ButtonProps) {
+export function Button({ tone = "solid", icon, loading, done, children, className = "", disabled, ...rest }: ButtonProps) {
   const state = loading ? "loading" : done ? "done" : "idle";
   return (
     <motion.button
@@ -210,7 +206,7 @@ export function CountUp({ value, format = (v) => v.toFixed(0), className }: {
  * Visibility is watched on the track: the bar itself starts at scaleX(0), i.e. zero width,
  * and a zero-area element is not reliably reported as intersecting.
  */
-export function Bar({ value, className = "bg-violet", track = "bg-black/5 dark:bg-white/10", delay = 0, height = "h-2" }: {
+export function Bar({ value, className = "bg-violet", track = "bg-white/10", delay = 0, height = "h-2" }: {
   value: number;
   className?: string;
   track?: string;
@@ -242,7 +238,7 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
   const id = useId();
   return (
     // a toggle group (aria-pressed), not ARIA tabs: there are no tab panels to point at
-    <div role="group" aria-label={label} className="inline-flex rounded-full bg-black/5 p-1 dark:bg-white/10">
+    <div role="group" aria-label={label} className="inline-flex rounded-full p-1 bg-white/10">
       {options.map((o) => {
         const active = o.value === value;
         return (
@@ -252,13 +248,13 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
             aria-pressed={active}
             onClick={() => onChange(o.value)}
             className={`relative rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-              active ? "text-white dark:text-ink" : "text-black/55 hover:text-black dark:text-white/70 dark:hover:text-white"
+              active ? "text-ink" : "text-white/70 hover:text-white"
             }`}
           >
             {active && (
               <motion.span
                 layoutId={`seg-${id}`}
-                className="absolute inset-0 rounded-full bg-ink dark:bg-white"
+                className="absolute inset-0 rounded-full bg-white"
                 transition={spring.layout}
               />
             )}

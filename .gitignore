@@ -11,3 +11,4 @@ reports/quick/
 web/node_modules/
 web/dist/
 .pytest_cache/
+web/*.tsbuildinfo

@@ -34,8 +34,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   }, [open]);
 
   return (
-    // the whole site is dark: `dark` switches every dark: variant on, in every page
-    <div className="dark on-dark min-h-dvh bg-ink text-white">
+    <div className="min-h-dvh bg-ink text-white">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-ink">
         Skip to content
       </a>

@@ -159,7 +159,7 @@ export default function Detect() {
               aria-invalid={!!hint}
               aria-describedby="text-help"
               placeholder="Paste an English text of 50 to 400 words…"
-              className={`block h-64 w-full resize-y rounded-2xl border bg-canvas/60 p-4 text-[15px] leading-relaxed text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-violet focus:bg-white sm:h-72 dark:bg-white/[0.04] dark:text-white dark:placeholder:text-white/50 dark:focus:bg-white/[0.06] ${hint ? "border-ai" : "border-line dark:border-white/10"}`}
+              className={`block h-64 w-full resize-y rounded-2xl border bg-white/[0.04] p-4 text-[15px] leading-relaxed text-white outline-none transition-colors placeholder:text-white/50 focus:border-violet focus:bg-white/[0.06] sm:h-72 ${hint ? "border-ai" : "border-white/10"}`}
             />
           </div>
           <div id="text-help" className="mt-3" aria-live="polite">
@@ -168,10 +168,10 @@ export default function Detect() {
                 <motion.p key="hint" initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="text-sm text-ai">{hint}</motion.p>
               ) : (
                 <motion.div key="count" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex items-center gap-3">
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-black/5 dark:bg-white/10">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
                     <motion.div className={`h-full origin-left rounded-full ${words >= minWords ? "bg-human" : "bg-violet"}`} animate={{ scaleX: Math.min(1, words / minWords) }} transition={spring.layout} />
                   </div>
-                  <span className="num shrink-0 text-xs text-ink/60 dark:text-white/55">
+                  <span className="num shrink-0 text-xs text-white/55">
                     {words} words{words > 400 ? " · only the first ~256 tokens are scored" : words >= minWords ? " · ready" : ` · ${minWords - words} to go`}
                   </span>
                 </motion.div>
@@ -179,9 +179,9 @@ export default function Detect() {
             </AnimatePresence>
           </div>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="hidden text-xs text-ink/45 sm:block dark:text-white/55">
-              <kbd className="rounded border border-line px-1.5 py-0.5 font-sans dark:border-white/15">Ctrl</kbd> +{" "}
-              <kbd className="rounded border border-line px-1.5 py-0.5 font-sans dark:border-white/15">Enter</kbd> to analyse
+            <p className="hidden text-xs sm:block text-white/55">
+              <kbd className="rounded border px-1.5 py-0.5 font-sans border-white/15">Ctrl</kbd> +{" "}
+              <kbd className="rounded border px-1.5 py-0.5 font-sans border-white/15">Enter</kbd> to analyse
             </p>
             <Button onClick={run} loading={loading} icon={<ScanText className="size-4" aria-hidden="true" />} className="w-full sm:w-auto sm:min-w-40">
               {loading ? "Analysing…" : "Analyse"}
@@ -205,11 +205,11 @@ export default function Detect() {
             ) : (
               <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid min-h-72 place-items-center text-center">
                 <div>
-                  <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-lavender-soft text-violet dark:bg-violet/15 dark:text-lavender">
+                  <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-violet/15 text-lavender">
                     <ScanText className="size-6" aria-hidden="true" />
                   </div>
                   <p className="mt-4 font-semibold">No text analysed yet</p>
-                  <p className="mx-auto mt-1 max-w-60 text-sm text-ink/55 dark:text-white/50">Paste a text or pick an example, then press Analyse.</p>
+                  <p className="mx-auto mt-1 max-w-60 text-sm text-white/50">Paste a text or pick an example, then press Analyse.</p>
                 </div>
               </motion.div>
             )}
@@ -255,7 +255,7 @@ function Band({ color, label, range }: { color: string; label: string; range: st
     <li className="flex items-center gap-2">
       <span className={`size-2.5 rounded-full ${color}`} aria-hidden="true" />
       <span className="font-medium">{label}</span>
-      <span className="num text-ink/55 dark:text-white/50">{range}</span>
+      <span className="num text-white/50">{range}</span>
     </li>
   );
 }
@@ -271,7 +271,7 @@ function IconButton({ label, onClick, disabled, children }: { label: string; onC
       whileHover={disabled ? undefined : { scale: 1.06 }}
       whileTap={disabled ? undefined : { scale: 0.92 }}
       transition={spring.press}
-      className="grid size-9 place-items-center rounded-full text-ink/60 hover:bg-black/5 hover:text-ink disabled:opacity-35 dark:text-white/60 dark:hover:bg-white/10 dark:hover:text-white"
+      className="grid size-9 place-items-center rounded-full disabled:opacity-35 text-white/60 hover:bg-white/10 hover:text-white"
     >
       {children}
     </motion.button>
@@ -302,7 +302,7 @@ function VerdictView({ r, onCopy, stale }: { r: Analysis; onCopy: () => void; st
       <motion.p variants={pop} className={`mt-3 flex items-baseline ${v.text}`}>
         <CountUp value={r.p_final * 100} format={asWhole} className="text-7xl font-extrabold" />
         <span className="ml-1 text-3xl font-bold">%</span>
-        <span className="ml-3 text-sm font-medium text-ink/55 dark:text-white/60">chance it is AI-generated</span>
+        <span className="ml-3 text-sm font-medium text-white/60">chance it is AI-generated</span>
       </motion.p>
       <motion.div variants={pop} className="relative mt-4 h-2.5 rounded-full bg-gradient-to-r from-human/25 via-unsure/25 to-ai/25">
         {/* full-width wrapper slid by x%: a transform, so no layout work per frame */}
@@ -312,7 +312,7 @@ function VerdictView({ r, onCopy, stale }: { r: Analysis; onCopy: () => void; st
           animate={{ x: `${r.p_final * 100}%` }}
           transition={{ duration: 1.1, ease: ease.out, delay: 0.2 }}
         >
-          <span className={`absolute top-1/2 left-0 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full ring-4 ring-white dark:ring-ink-2 ${v.bg}`} />
+          <span className={`absolute top-1/2 left-0 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full ring-4 ring-ink-2 ${v.bg}`} />
         </motion.div>
       </motion.div>
       {/* reference: big split numerals "46 | 74" */}
@@ -321,9 +321,9 @@ function VerdictView({ r, onCopy, stale }: { r: Analysis; onCopy: () => void; st
         <ModelScore label="Word model" sub="TF-IDF + LR" value={r.p_words} />
       </motion.div>
       <motion.div variants={pop} className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <p className={`text-sm ${r.models_agree ? "text-ink/60 dark:text-white/55" : "font-medium text-unsure"}`}>
+        <p className={`text-sm ${r.models_agree ? "text-white/55" : "font-medium text-unsure"}`}>
           {r.models_agree ? "Both models agree." : "The models disagree. Treat this with extra caution."}
-          <span className="block text-xs text-ink/40 dark:text-white/55">{r.words} words · analysed in {r.ms} ms</span>
+          <span className="block text-xs text-white/55">{r.words} words · analysed in {r.ms} ms</span>
         </p>
         <Button
           tone="outline"
@@ -345,13 +345,13 @@ function VerdictView({ r, onCopy, stale }: { r: Analysis; onCopy: () => void; st
 
 function ModelScore({ label, sub, value }: { label: string; sub: string; value: number }) {
   return (
-    <motion.div whileHover={lift} className="rounded-2xl bg-canvas/70 p-4 dark:bg-white/[0.04]">
-      <p className="text-xs font-medium text-ink/55 dark:text-white/50">{label}</p>
+    <motion.div whileHover={lift} className="rounded-2xl p-4 bg-white/[0.04]">
+      <p className="text-xs font-medium text-white/50">{label}</p>
       <p className="num mt-1 text-3xl font-extrabold">
         <CountUp value={value * 100} format={asWhole} />
         <span className="text-lg">%</span>
       </p>
-      <p className="mb-3 text-[11px] text-ink/40 dark:text-white/55">{sub}</p>
+      <p className="mb-3 text-[11px] text-white/55">{sub}</p>
       <Bar value={value} className="bg-violet" delay={0.3} />
     </motion.div>
   );
@@ -371,8 +371,8 @@ function Reasons({ items }: { items: Contribution[] }) {
   return (
     <motion.section variants={pop} className="card p-5 sm:p-6 xl:col-span-5" aria-labelledby="reasons-h">
       <h2 id="reasons-h" className="font-semibold">Top reasons</h2>
-      <p className="text-xs text-ink/50 dark:text-white/55">From the style model, compared with typical writing</p>
-      <motion.ul className="mt-4 divide-y divide-line dark:divide-white/10" variants={group(0.06)}>
+      <p className="text-xs text-white/55">From the style model, compared with typical writing</p>
+      <motion.ul className="mt-4 divide-y divide-white/10" variants={group(0.06)}>
         {items.map((c) => (
           <motion.li key={c.feature} variants={{ hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0 } }} className="flex items-center justify-between gap-3 py-3">
             <div className="min-w-0">
@@ -380,7 +380,7 @@ function Reasons({ items }: { items: Contribution[] }) {
                 <span className="font-semibold">{c.name}</span> is <span className="num font-semibold">{fmtFeature(c.feature, c.value)}</span>
               </p>
               {c.typical && (
-                <p className="text-xs text-ink/50 dark:text-white/55">
+                <p className="text-xs text-white/55">
                   humans ~{fmtFeature(c.feature, c.typical.human)} · AI ~{fmtFeature(c.feature, c.typical.ai)}
                 </p>
               )}
@@ -402,7 +402,7 @@ function ShapChart({ items }: { items: Contribution[] }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 id="shap-h" className="font-semibold">Why: feature contributions</h2>
-          <p className="text-xs text-ink/50 dark:text-white/55">SHAP values of the style model, 10 strongest of 18</p>
+          <p className="text-xs text-white/55">SHAP values of the style model, 10 strongest of 18</p>
         </div>
         <div className="flex gap-3 text-xs">
           <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-human" />towards human</span>
@@ -415,9 +415,9 @@ function ShapChart({ items }: { items: Contribution[] }) {
           const ai = c.shap > 0;
           return (
             <li key={c.feature} className="grid grid-cols-[minmax(0,9rem)_1fr] items-center gap-3 sm:grid-cols-[12rem_1fr]">
-              <span className="truncate text-xs font-medium text-ink/70 dark:text-white/65" title={c.name}>{c.name}</span>
+              <span className="truncate text-xs font-medium text-white/65" title={c.name}>{c.name}</span>
               <div className="relative grid h-6 grid-cols-2">
-                <span className="absolute inset-y-0 left-1/2 w-px bg-line dark:bg-white/15" aria-hidden="true" />
+                <span className="absolute inset-y-0 left-1/2 w-px bg-white/15" aria-hidden="true" />
                 <div className="flex justify-end">
                   {!ai && (
                     <motion.span className="h-full origin-right rounded-l-md bg-human" style={{ width: `${w * 100}%` }} initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.7, ease: ease.out, delay: 0.2 + i * 0.04 }} />
@@ -447,7 +447,7 @@ function WordEvidence({ highlights }: { highlights: Analysis["highlights"] }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 id="words-h" className="font-semibold">Word evidence</h2>
-          <p className="text-xs text-ink/50 dark:text-white/55">How the word model weighs each word: rose pushes towards AI, green towards human</p>
+          <p className="text-xs text-white/55">How the word model weighs each word: rose pushes towards AI, green towards human</p>
         </div>
         <Segmented label="Highlight" value={mode} onChange={setMode} options={[{ value: "all", label: "All words" }, { value: "strong", label: "Strongest only" }]} />
       </div>
@@ -487,13 +487,13 @@ function FeatureTable({ items }: { items: Contribution[] }) {
         <div className="flex flex-wrap items-center gap-2">
           <label className="relative">
             <span className="sr-only">Search features</span>
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink/40 dark:text-white/55" aria-hidden="true" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-white/55" aria-hidden="true" />
             <input
               type="search"
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Search features"
-              className="h-9 w-48 rounded-full border border-line bg-transparent pr-3 pl-9 text-sm outline-none focus:border-violet dark:border-white/10"
+              className="h-9 w-48 rounded-full border bg-transparent pr-3 pl-9 text-sm outline-none focus:border-violet border-white/10"
             />
           </label>
           <Segmented label="Filter by direction" value={dir} onChange={setDir} options={[{ value: "all", label: "All" }, { value: "ai", label: "→ AI" }, { value: "human", label: "→ human" }]} />
@@ -502,7 +502,7 @@ function FeatureTable({ items }: { items: Contribution[] }) {
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[560px] text-sm">
           <thead>
-            <tr className="text-left text-xs text-ink/50 dark:text-white/55">
+            <tr className="text-left text-xs text-white/55">
               <th scope="col" className="py-2 pr-3 font-medium">Feature</th>
               <th scope="col" className="py-2 pr-3 text-right font-medium">This text</th>
               <th scope="col" className="py-2 pr-3 text-right font-medium">Typical human</th>
@@ -513,21 +513,21 @@ function FeatureTable({ items }: { items: Contribution[] }) {
           <tbody>
             <AnimatePresence initial={false}>
               {rows.map((c) => (
-                <motion.tr key={c.feature} layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="border-t border-line dark:border-white/10">
+                <motion.tr key={c.feature} layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="border-t border-white/10">
                   <td className="py-2.5 pr-3">
                     <span className="font-medium">{c.name}</span>
-                    <span className="block font-mono text-[11px] text-ink/40 dark:text-white/55">{c.feature}</span>
+                    <span className="block font-mono text-[11px] text-white/55">{c.feature}</span>
                   </td>
                   <td className="num py-2.5 pr-3 text-right font-semibold">{fmtFeature(c.feature, c.value)}</td>
-                  <td className="num py-2.5 pr-3 text-right text-ink/60 dark:text-white/55">{c.typical ? fmtFeature(c.feature, c.typical.human) : "–"}</td>
-                  <td className="num py-2.5 pr-3 text-right text-ink/60 dark:text-white/55">{c.typical ? fmtFeature(c.feature, c.typical.ai) : "–"}</td>
-                  <td className="py-2.5 text-right"><Direction shap={c.shap} /> <span className="num ml-1 text-xs text-ink/45 dark:text-white/55">{c.shap > 0 ? "+" : ""}{c.shap.toFixed(2)}</span></td>
+                  <td className="num py-2.5 pr-3 text-right text-white/55">{c.typical ? fmtFeature(c.feature, c.typical.human) : "–"}</td>
+                  <td className="num py-2.5 pr-3 text-right text-white/55">{c.typical ? fmtFeature(c.feature, c.typical.ai) : "–"}</td>
+                  <td className="py-2.5 text-right"><Direction shap={c.shap} /> <span className="num ml-1 text-xs text-white/55">{c.shap > 0 ? "+" : ""}{c.shap.toFixed(2)}</span></td>
                 </motion.tr>
               ))}
             </AnimatePresence>
           </tbody>
         </table>
-        {rows.length === 0 && <p className="py-8 text-center text-sm text-ink/50 dark:text-white/55">No features match “{q}”.</p>}
+        {rows.length === 0 && <p className="py-8 text-center text-sm text-white/55">No features match “{q}”.</p>}
       </div>
     </motion.section>
   );

@@ -74,13 +74,13 @@ export default function Results() {
         {/* ---- model comparison ---- */}
         <motion.section variants={pop} className="card p-5 sm:p-6" aria-labelledby="cmp-h">
           <h2 id="cmp-h" className="font-semibold">Model comparison</h2>
-          <p className="text-xs text-ink/50 dark:text-white/55">GlassQuill's verdict is the average of XGBoost and TF-IDF + LR. Rule chosen on the validation set.</p>
+          <p className="text-xs text-white/55">GlassQuill's verdict is the average of XGBoost and TF-IDF + LR. Rule chosen on the validation set.</p>
           <div className="mt-4 overflow-x-auto">
             {meta ? (
               <AnimatePresence mode="wait">
                 <motion.table key={set} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="w-full min-w-[640px] text-sm">
                   <thead>
-                    <tr className="text-left text-xs text-ink/50 dark:text-white/55">
+                    <tr className="text-left text-xs text-white/55">
                       <th scope="col" className="py-2 pr-4 font-medium">Model</th>
                       {set === "paraphrase" ? (
                         <>
@@ -132,13 +132,13 @@ function StatCard({ icon: Icon, title, value, format, down }: { icon: typeof Tar
   return (
     <motion.div variants={pop} whileHover={lift} className="card p-5">
       <div className="flex items-start justify-between">
-        <p className="text-sm text-ink/60 dark:text-white/55">{title}</p>
-        <span className="grid size-9 place-items-center rounded-xl bg-lavender-soft text-violet dark:bg-violet/15 dark:text-lavender">
+        <p className="text-sm text-white/55">{title}</p>
+        <span className="grid size-9 place-items-center rounded-xl bg-violet/15 text-lavender">
           <Icon className="size-4" aria-hidden="true" />
         </span>
       </div>
       <CountUp value={value} format={format} className="mt-2 block text-3xl font-extrabold sm:text-4xl" />
-      <p className={`mt-1 flex items-center gap-1 text-xs font-medium ${down ? "text-human" : "text-violet dark:text-lavender"}`}>
+      <p className={`mt-1 flex items-center gap-1 text-xs font-medium ${down ? "text-human" : "text-lavender"}`}>
         {down ? <ArrowDownRight className="size-3.5" /> : <ArrowUpRight className="size-3.5" />} GlassQuill verdict
       </p>
     </motion.div>
@@ -150,7 +150,7 @@ function ModelRow({ r, i, paraphrase, best: b }: { r: Row; i: number; paraphrase
   const n = (k: string) => Number(r[k]);
   const cell = "num py-3 pr-4 text-right";
   return (
-    <motion.tr initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.35, ease: ease.out }} className={`border-t border-line dark:border-white/10 ${app ? "bg-lavender-soft/60 dark:bg-violet/10" : ""}`}>
+    <motion.tr initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.35, ease: ease.out }} className={`border-t border-white/10 ${app ? "bg-violet/10" : ""}`}>
       <th scope="row" className={`py-3 pr-4 text-left ${app ? "font-semibold" : "font-medium"}`}>
         {label(r.model)}
         {app && <span className="ml-2 rounded-full bg-violet px-2 py-0.5 text-[10px] font-bold text-white">APP</span>}
@@ -159,7 +159,7 @@ function ModelRow({ r, i, paraphrase, best: b }: { r: Row; i: number; paraphrase
         <>
           <td className="py-3 pr-4">
             <div className="flex items-center gap-3">
-              <div className="flex-1"><Bar value={n("recall_after")} className={app ? "bg-violet" : "bg-ink/30 dark:bg-white/35"} delay={i * 0.05} /></div>
+              <div className="flex-1"><Bar value={n("recall_after")} className={app ? "bg-violet" : "bg-white/35"} delay={i * 0.05} /></div>
               <span className="num w-28 text-right text-xs">{(n("recall_before") * 100).toFixed(0)}% → <b>{(n("recall_after") * 100).toFixed(0)}%</b></span>
             </div>
           </td>
@@ -169,7 +169,7 @@ function ModelRow({ r, i, paraphrase, best: b }: { r: Row; i: number; paraphrase
         <>
           <td className="py-3 pr-4">
             <div className="flex items-center gap-3">
-              <div className="flex-1"><Bar value={n("accuracy")} className={app ? "bg-violet" : "bg-ink/30 dark:bg-white/35"} delay={i * 0.05} /></div>
+              <div className="flex-1"><Bar value={n("accuracy")} className={app ? "bg-violet" : "bg-white/35"} delay={i * 0.05} /></div>
               <span className={`num w-14 text-right ${n("accuracy") === b.accuracy ? "font-bold" : ""}`}>{(n("accuracy") * 100).toFixed(1)}%</span>
             </div>
           </td>
@@ -197,13 +197,13 @@ function CorpusBars({ rows }: { rows?: Row[] }) {
   return (
     <motion.section variants={pop} className="card p-5 sm:p-6 xl:col-span-5" aria-labelledby="corpus-h">
       <h2 id="corpus-h" className="font-semibold">F1 by corpus</h2>
-      <p className="text-xs text-ink/50 dark:text-white/55">GlassQuill verdict vs XGBoost alone, test set</p>
+      <p className="text-xs text-white/55">GlassQuill verdict vs XGBoost alone, test set</p>
       {rows ? (
         <div ref={chart} className="mt-6 grid h-56 grid-cols-3 items-end gap-4" role="img" aria-label={corpora.map(([c, n]) => `${n}: verdict F1 ${f1(c, APP_MODEL).toFixed(3)}, XGBoost ${f1(c, "XGBoost").toFixed(3)}`).join("; ")}>
           {corpora.map(([c, name, sub], i) => (
             <div key={c} className="flex h-full flex-col justify-end">
               <div className="flex h-full items-end justify-center gap-1.5">
-                {[["XGBoost", "bg-lilac dark:bg-lavender/30"], [APP_MODEL, "bg-gradient-to-t from-violet to-lavender"]].map(([m, cls], j) => (
+                {[["XGBoost", "bg-lavender/30"], [APP_MODEL, "bg-gradient-to-t from-violet to-lavender"]].map(([m, cls], j) => (
                   <motion.div
                     key={m}
                     className={`w-7 origin-bottom rounded-full sm:w-9 ${cls}`}
@@ -215,16 +215,16 @@ function CorpusBars({ rows }: { rows?: Row[] }) {
                 ))}
               </div>
               <p className="mt-3 text-center text-sm font-semibold">{name}</p>
-              <p className="text-center text-[11px] text-ink/45 dark:text-white/55">{sub}</p>
-              <p className="num text-center text-xs font-bold text-violet dark:text-lavender">{f1(c, APP_MODEL).toFixed(3)}</p>
+              <p className="text-center text-[11px] text-white/55">{sub}</p>
+              <p className="num text-center text-xs font-bold text-lavender">{f1(c, APP_MODEL).toFixed(3)}</p>
             </div>
           ))}
         </div>
       ) : (
         <Skeleton className="mt-6 h-56" />
       )}
-      <div className="mt-4 flex gap-4 text-xs text-ink/55 dark:text-white/50">
-        <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-lilac dark:bg-lavender/30" /> XGBoost</span>
+      <div className="mt-4 flex gap-4 text-xs text-white/50">
+        <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-lavender/30" /> XGBoost</span>
         <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-violet" /> GlassQuill verdict</span>
         <span className="ml-auto">axis 0.5 – 1.0</span>
       </div>
@@ -237,7 +237,7 @@ function GeneratorBars({ rows }: { rows?: Row[] }) {
   return (
     <motion.section variants={pop} className="card p-5 sm:p-6 xl:col-span-7" aria-labelledby="gen-h">
       <h2 id="gen-h" className="font-semibold">Who fools the detector? (MAGE)</h2>
-      <p className="text-xs text-ink/50 dark:text-white/55">Share of each generator's texts the GlassQuill verdict labels correctly</p>
+      <p className="text-xs text-white/55">Share of each generator's texts the GlassQuill verdict labels correctly</p>
       <ul className="mt-5 space-y-2.5">
         {rows
           ? sorted.map((r, i) => {
@@ -245,7 +245,7 @@ function GeneratorBars({ rows }: { rows?: Row[] }) {
               const human = r.generator === "human";
               return (
                 <li key={String(r.generator)} className="grid grid-cols-[8.5rem_1fr_3rem] items-center gap-3">
-                  <span className="truncate text-xs font-medium">{human ? "Human texts" : String(r.generator)} <span className="text-ink/40 dark:text-white/55">· {Number(r.n)}</span></span>
+                  <span className="truncate text-xs font-medium">{human ? "Human texts" : String(r.generator)} <span className="text-white/55">· {Number(r.n)}</span></span>
                   <Bar value={v} delay={i * 0.04} className={human ? "bg-human" : v < 0.3 ? "bg-ai/70" : "bg-violet"} />
                   <span className="num text-right text-xs font-semibold">{(v * 100).toFixed(0)}%</span>
                 </li>
@@ -253,7 +253,7 @@ function GeneratorBars({ rows }: { rows?: Row[] }) {
             })
           : Array.from({ length: 8 }, (_, i) => <Skeleton key={i} className="h-5" />)}
       </ul>
-      <p className="mt-4 text-xs leading-relaxed text-ink/55 dark:text-white/50">
+      <p className="mt-4 text-xs leading-relaxed text-white/50">
         Chat models (GPT-4, GPT-3.5) are caught most of the time. Small base models such as OPT, BLOOM and GPT-J
         sample unusual words, so their text looks human to every model we tested.
       </p>
@@ -267,7 +267,7 @@ function ShapGlobal({ rows }: { rows?: Row[] }) {
   return (
     <motion.section variants={pop} className="card p-5 sm:p-6" aria-labelledby="shapg-h">
       <h2 id="shapg-h" className="font-semibold">What the style model relies on</h2>
-      <p className="text-xs text-ink/50 dark:text-white/55">Mean |SHAP| over the test set, and which way a higher value pushes</p>
+      <p className="text-xs text-white/55">Mean |SHAP| over the test set, and which way a higher value pushes</p>
       <motion.ul initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={group(0.04)} className="mt-5 grid gap-x-10 gap-y-3 md:grid-cols-2">
         {rows
           ? top.map((r, i) => (

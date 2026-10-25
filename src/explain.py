@@ -59,7 +59,7 @@ def lr_word_weights(pipe, text):
 
 
 def highlight(text, weights):
-    """(word, score) pairs for gr.HighlightedText. Positive = AI-like."""
+    """(word, score) pairs for the coloured word view. Positive = towards AI."""
     top = max((abs(v) for v in weights.values()), default=1.0) or 1.0
     out = []
     for w in text.split():

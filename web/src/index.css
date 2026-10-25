@@ -1,62 +1,48 @@
 @import "tailwindcss";
 @import "@fontsource-variable/inter";
 
-/* dark mode is a class on <html>, set by the theme toggle */
-@custom-variant dark (&:where(.dark, .dark *));
-
-/* ---------- design tokens ---------- */
+/* ---------- design tokens (used as Tailwind classes: bg-ink, text-flame, ...) ---------- */
 @theme {
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
 
-  --color-ink: #07070a;          /* cinematic black (landing, sidebar) */
+  --color-ink: #07070a;          /* page background */
   --color-ink-2: #121218;        /* raised dark surface */
-  --color-canvas: #ececf1;       /* dashboard background (light) */
-  --color-card: #ffffff;
-  --color-line: #e4e3ea;
+  --color-canvas: #ececf1;       /* the light product card in the homepage hero */
+  --color-line: #e4e3ea;         /* dividers on that light card */
 
-  --color-violet: #7c3aed;       /* brand / primary */
-  --color-violet-deep: #5b21b6;
+  --color-violet: #7c3aed;       /* brand */
   --color-lavender: #c4b5fd;
   --color-lavender-soft: #ede9fe;
   --color-lilac: #ddd3ff;
-  --color-flame: #ff6a1f;        /* orange section accent */
+  --color-flame: #ff6a1f;        /* orange accents */
 
-  --color-ai: #f43f5e;           /* verdict colours, distinct from the brand */
+  --color-ai: #f43f5e;           /* verdict colours, kept apart from the brand colours */
   --color-human: #059669;
   --color-unsure: #d97706;
 
   --radius-card: 1.375rem;
-  --shadow-card: 0 1px 2px rgb(16 16 24 / 0.04), 0 8px 24px -12px rgb(16 16 24 / 0.12);
-  --shadow-lift: 0 2px 4px rgb(16 16 24 / 0.05), 0 24px 48px -20px rgb(76 29 149 / 0.28);
 }
 
 /* ---------- base ---------- */
 html {
-  -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
-  scroll-padding-top: 5rem;      /* anchor links land below the sticky header */
+  scroll-padding-top: 5rem;      /* anchor links land below the fixed header */
 }
 html,
 body {
-  overflow-x: clip;              /* no accidental horizontal scroll, sticky still works */
-  max-width: 100%;
+  overflow-x: clip;              /* never a sideways scrollbar */
 }
 body {
   @apply bg-ink font-sans text-white antialiased;
-  text-rendering: optimizeLegibility;
 }
 ::selection {
   background: var(--color-lavender);
   color: var(--color-ink);
 }
-:focus-visible {
-  outline: 2px solid var(--color-violet);
+:focus-visible {                 /* visible keyboard focus on every control */
+  outline: 2px solid var(--color-lavender);
   outline-offset: 3px;
   border-radius: 6px;
-}
-.dark :focus-visible,
-.on-dark :focus-visible {
-  outline-color: var(--color-lavender);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -73,29 +59,24 @@ body {
 }
 
 /* ---------- small utilities ---------- */
-@utility card {
+@utility card {                  /* dark card with a hairline border */
   border-radius: var(--radius-card);
-  background: var(--color-card);
-  box-shadow: var(--shadow-card);
-  &:where(.dark *) {
-    /* same surface as the homepage cards: faint white fill, hairline border */
-    background: rgb(255 255 255 / 0.03);
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
-  }
+  background: rgb(255 255 255 / 0.03);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.1);
 }
-@utility eyebrow {
+@utility eyebrow {               /* small orange label above headings */
   font-size: 0.75rem;
   font-weight: 650;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--color-flame);
 }
-@utility num {
+@utility num {                   /* digits that line up */
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.03em;
 }
 
-/* skeleton shimmer (transform-only) */
+/* loading placeholder with a moving shine */
 .skeleton {
   position: relative;
   overflow: hidden;
@@ -107,11 +88,8 @@ body {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.5), transparent);
-  animation: shimmer 1.4s infinite;
-}
-.dark .skeleton::after {
   background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.07), transparent);
+  animation: shimmer 1.4s infinite;
 }
 @keyframes shimmer {
   to {

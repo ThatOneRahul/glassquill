@@ -16,3 +16,4 @@ pyarrow
 fastapi
 uvicorn
 filelock>=4.2.1
+pytest

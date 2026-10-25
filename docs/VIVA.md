@@ -2,6 +2,8 @@
 
 The viva is individual: **each member must be able to answer every question here**, not only the ones about the part they built. The answers are short on purpose, so say them in your own words.
 
+Questions about the code itself ("where do you prevent leakage?", "show me how perplexity is computed") are answered in [`CODE_WALKTHROUGH.md`](CODE_WALKTHROUGH.md), with links to the exact functions. Open the files and practise finding each answer.
+
 ## Problem and use case
 **Q. What problem does GlassQuill solve?**
 AI-text detectors give a score without a reason, and a wrong flag can hurt a student. We classify text as human or AI and show *why*, so a teacher can check the reasoning.
