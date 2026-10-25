@@ -46,7 +46,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
   try {
     res = await fetch(path, { ...init, headers: { "Content-Type": "application/json" } });
-  } catch {
+  } catch (e) {
+    // a cancelled request (Clear, or a newer Analyse) is not a network failure
+    if ((e as Error).name === "AbortError") throw e;
     throw new ApiError("Can't reach the GlassQuill server. Is `python server.py` running?");
   }
   const body = await res.json().catch(() => ({}));

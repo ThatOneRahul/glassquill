@@ -15,6 +15,7 @@ const SETS: { value: SetKey; label: string; about: string }[] = [
 ];
 const pct1 = (v: number) => `${v.toFixed(1)}%`;
 const fixed3 = (v: number) => v.toFixed(3);
+const whole = (v: number) => v.toFixed(0);
 const label = (m: string | number) => (m === APP_MODEL ? "GlassQuill verdict" : String(m));
 
 export default function Results() {
@@ -57,7 +58,7 @@ export default function Results() {
                 <StatCard icon={Target} title="Caught before" value={Number(app.recall_before) * 100} format={pct1} />
                 <StatCard icon={Crosshair} title="Caught after paraphrasing" value={Number(app.recall_after) * 100} format={pct1} />
                 <StatCard icon={ArrowDownRight} title="Drop" value={Number(app.drop) * 100} format={pct1} down />
-                <StatCard icon={ShieldCheck} title="Texts tested" value={60} format={(v) => v.toFixed(0)} />
+                <StatCard icon={ShieldCheck} title="Texts tested" value={60} format={whole} />
               </>
             ) : app ? (
               <>
@@ -73,13 +74,13 @@ export default function Results() {
         {/* ---- model comparison ---- */}
         <motion.section variants={pop} className="card p-5 sm:p-6" aria-labelledby="cmp-h">
           <h2 id="cmp-h" className="font-semibold">Model comparison</h2>
-          <p className="text-xs text-ink/50 dark:text-white/45">GlassQuill's verdict is the average of XGBoost and TF-IDF + LR. Rule chosen on the validation set.</p>
+          <p className="text-xs text-ink/50 dark:text-white/55">GlassQuill's verdict is the average of XGBoost and TF-IDF + LR. Rule chosen on the validation set.</p>
           <div className="mt-4 overflow-x-auto">
             {meta ? (
               <AnimatePresence mode="wait">
                 <motion.table key={set} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="w-full min-w-[640px] text-sm">
                   <thead>
-                    <tr className="text-left text-xs text-ink/50 dark:text-white/45">
+                    <tr className="text-left text-xs text-ink/50 dark:text-white/55">
                       <th scope="col" className="py-2 pr-4 font-medium">Model</th>
                       {set === "paraphrase" ? (
                         <>
@@ -196,7 +197,7 @@ function CorpusBars({ rows }: { rows?: Row[] }) {
   return (
     <motion.section variants={pop} className="card p-5 sm:p-6 xl:col-span-5" aria-labelledby="corpus-h">
       <h2 id="corpus-h" className="font-semibold">F1 by corpus</h2>
-      <p className="text-xs text-ink/50 dark:text-white/45">GlassQuill verdict vs XGBoost alone, test set</p>
+      <p className="text-xs text-ink/50 dark:text-white/55">GlassQuill verdict vs XGBoost alone, test set</p>
       {rows ? (
         <div ref={chart} className="mt-6 grid h-56 grid-cols-3 items-end gap-4" role="img" aria-label={corpora.map(([c, n]) => `${n}: verdict F1 ${f1(c, APP_MODEL).toFixed(3)}, XGBoost ${f1(c, "XGBoost").toFixed(3)}`).join("; ")}>
           {corpora.map(([c, name, sub], i) => (
@@ -214,7 +215,7 @@ function CorpusBars({ rows }: { rows?: Row[] }) {
                 ))}
               </div>
               <p className="mt-3 text-center text-sm font-semibold">{name}</p>
-              <p className="text-center text-[11px] text-ink/45 dark:text-white/40">{sub}</p>
+              <p className="text-center text-[11px] text-ink/45 dark:text-white/55">{sub}</p>
               <p className="num text-center text-xs font-bold text-violet dark:text-lavender">{f1(c, APP_MODEL).toFixed(3)}</p>
             </div>
           ))}
@@ -236,7 +237,7 @@ function GeneratorBars({ rows }: { rows?: Row[] }) {
   return (
     <motion.section variants={pop} className="card p-5 sm:p-6 xl:col-span-7" aria-labelledby="gen-h">
       <h2 id="gen-h" className="font-semibold">Who fools the detector? (MAGE)</h2>
-      <p className="text-xs text-ink/50 dark:text-white/45">Share of each generator's texts the GlassQuill verdict labels correctly</p>
+      <p className="text-xs text-ink/50 dark:text-white/55">Share of each generator's texts the GlassQuill verdict labels correctly</p>
       <ul className="mt-5 space-y-2.5">
         {rows
           ? sorted.map((r, i) => {
@@ -244,7 +245,7 @@ function GeneratorBars({ rows }: { rows?: Row[] }) {
               const human = r.generator === "human";
               return (
                 <li key={String(r.generator)} className="grid grid-cols-[8.5rem_1fr_3rem] items-center gap-3">
-                  <span className="truncate text-xs font-medium">{human ? "Human texts" : String(r.generator)} <span className="text-ink/40 dark:text-white/35">· {Number(r.n)}</span></span>
+                  <span className="truncate text-xs font-medium">{human ? "Human texts" : String(r.generator)} <span className="text-ink/40 dark:text-white/55">· {Number(r.n)}</span></span>
                   <Bar value={v} delay={i * 0.04} className={human ? "bg-human" : v < 0.3 ? "bg-ai/70" : "bg-violet"} />
                   <span className="num text-right text-xs font-semibold">{(v * 100).toFixed(0)}%</span>
                 </li>
@@ -266,7 +267,7 @@ function ShapGlobal({ rows }: { rows?: Row[] }) {
   return (
     <motion.section variants={pop} className="card p-5 sm:p-6" aria-labelledby="shapg-h">
       <h2 id="shapg-h" className="font-semibold">What the style model relies on</h2>
-      <p className="text-xs text-ink/50 dark:text-white/45">Mean |SHAP| over the test set, and which way a higher value pushes</p>
+      <p className="text-xs text-ink/50 dark:text-white/55">Mean |SHAP| over the test set, and which way a higher value pushes</p>
       <motion.ul initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={group(0.04)} className="mt-5 grid gap-x-10 gap-y-3 md:grid-cols-2">
         {rows
           ? top.map((r, i) => (

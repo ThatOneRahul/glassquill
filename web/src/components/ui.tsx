@@ -7,7 +7,7 @@ import {
   type HTMLMotionProps,
 } from "motion/react";
 import { Check, LoaderCircle } from "lucide-react";
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { duration, ease, group, inView, press, rise, spring } from "../lib/motion";
 
 /* ---------------- brand ---------------- */
@@ -241,17 +241,18 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
 }) {
   const id = useId();
   return (
-    <div role="tablist" aria-label={label} className="inline-flex rounded-full bg-black/5 p-1 dark:bg-white/10">
+    // a toggle group (aria-pressed), not ARIA tabs: there are no tab panels to point at
+    <div role="group" aria-label={label} className="inline-flex rounded-full bg-black/5 p-1 dark:bg-white/10">
       {options.map((o) => {
         const active = o.value === value;
         return (
           <button
             key={o.value}
-            role="tab"
-            aria-selected={active}
+            type="button"
+            aria-pressed={active}
             onClick={() => onChange(o.value)}
             className={`relative rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors ${
-              active ? "text-white dark:text-ink" : "text-black/55 hover:text-black dark:text-white/60 dark:hover:text-white"
+              active ? "text-white dark:text-ink" : "text-black/55 hover:text-black dark:text-white/70 dark:hover:text-white"
             }`}
           >
             {active && (
@@ -272,11 +273,13 @@ export function Segmented<T extends string>({ options, value, onChange, label }:
 /* ---------------- toast ---------------- */
 
 export function Toast({ message, tone = "error", onClose }: { message: string | null; tone?: "error" | "ok"; onClose: () => void }) {
+  // errors stay long enough to read, and never time out while hovered or focused
+  const [held, setHeld] = useState(false);
   useEffect(() => {
-    if (!message) return;
-    const t = setTimeout(onClose, 5000);
+    if (!message || held) return;
+    const t = setTimeout(onClose, tone === "error" ? 8000 : 4000);
     return () => clearTimeout(t);
-  }, [message, onClose]);
+  }, [message, onClose, held, tone]);
   return (
     <div className="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex justify-center px-4" aria-live="polite">
       <AnimatePresence>
@@ -284,6 +287,10 @@ export function Toast({ message, tone = "error", onClose }: { message: string | 
           <motion.div
             key={message}
             role={tone === "error" ? "alert" : "status"}
+            onMouseEnter={() => setHeld(true)}
+            onMouseLeave={() => setHeld(false)}
+            onFocus={() => setHeld(true)}
+            onBlur={() => setHeld(false)}
             initial={{ opacity: 0, y: 24, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 12, scale: 0.98 }}

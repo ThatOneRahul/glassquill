@@ -81,7 +81,7 @@ export default function Method() {
           <motion.div initial="hidden" whileInView="show" viewport={{ once: true, amount: 0.2 }} variants={group(0.07)} className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {DATA.map((d) => (
               <motion.article key={d.name} variants={pop} whileHover={lift} className="card p-5">
-                <p className="text-xs font-semibold text-ink/45 dark:text-white/40">Dataset</p>
+                <p className="text-xs font-semibold text-ink/45 dark:text-white/55">Dataset</p>
                 <h3 className="text-xl font-bold">{d.name}</h3>
                 <p className="mt-3 text-sm font-medium">{d.who}</p>
                 <p className="mt-1 text-sm text-ink/55 dark:text-white/50">{d.where}</p>
@@ -94,7 +94,7 @@ export default function Method() {
         {/* features */}
         <motion.section id="features" variants={pop} className="card scroll-mt-24 p-5 sm:p-8" aria-labelledby="feat-h">
           <h2 id="feat-h" className="font-semibold">The 18 features the style model reads</h2>
-          <p className="text-xs text-ink/50 dark:text-white/45">Median value in the training set for human and AI texts</p>
+          <p className="text-xs text-ink/50 dark:text-white/55">Median value in the training set for human and AI texts</p>
           <div className="mt-6 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {FEATURE_GROUPS.map(([g, feats]) => (
               <div key={g}>
@@ -119,7 +119,7 @@ export default function Method() {
               </div>
             ))}
           </div>
-          <p className="mt-4 text-xs text-ink/50 dark:text-white/45"><span className="text-human">green</span> = typical human · <span className="text-ai">rose</span> = typical AI</p>
+          <p className="mt-4 text-xs text-ink/50 dark:text-white/55"><span className="text-human">green</span> = typical human · <span className="text-ai">rose</span> = typical AI</p>
         </motion.section>
 
         {/* limits */}

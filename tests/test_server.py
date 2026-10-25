@@ -87,6 +87,70 @@ def test_markup_is_returned_as_plain_text():
     assert any("<script>" in h["token"] for h in body["highlights"])
 
 
+def test_chunked_body_rejected():
+    """Without Content-Length the size cap could not be checked before reading the body."""
+    def body():
+        yield b'{"text": "' + b"a " * 50_000
+        yield b'"}'
+    r = client.post("/api/analyze", content=body(), headers={"Content-Type": "application/json"})
+    assert r.status_code == 411
+
+
+def test_bad_content_length():
+    r = client.post("/api/analyze", content=b"{}", headers={"Content-Type": "application/json", "Content-Length": "abc"})
+    assert r.status_code in (400, 413)
+
+
+def test_validation_error_does_not_echo_input():
+    secret = "SECRETWORD " * 1200                      # > 12,000 characters
+    r = client.post("/api/analyze", json={"text": secret})
+    assert r.status_code == 422 and "SECRETWORD" not in r.text
+    assert isinstance(r.json()["detail"], str)
+
+
+@pytest.mark.parametrize("junk", [
+    "😀 " * 60,
+    " ".join(str(i) for i in range(60)),
+    "यह एक परीक्षण वाक्य है " * 12,
+    "!!! " * 60,
+    "a " * 60,
+])
+def test_non_prose_rejected(junk):
+    r = client.post("/api/analyze", json={"text": junk})
+    assert r.status_code == 422 and "detail" in r.json()
+
+
+def test_invisible_characters_are_ignored():
+    """Zero-width spaces, RTL overrides and null bytes must not change the verdict."""
+    clean = client.post("/api/analyze", json={"text": HUMAN}).json()
+    dirty_text = HUMAN.replace(" ", " ​").replace("e", "e‮", 3) + "\x00"
+    dirty = client.post("/api/analyze", json={"text": dirty_text}).json()
+    assert abs(clean["p_final"] - dirty["p_final"]) < 1e-6
+
+
+def test_busy_model_returns_503(monkeypatch):
+    monkeypatch.setattr(server, "BUSY_WAIT", 0.1)
+    server.lock.acquire()
+    try:
+        r = client.post("/api/analyze", json={"text": HUMAN})
+    finally:
+        server.lock.release()
+    assert r.status_code == 503
+
+
+def test_cache_headers():
+    assert client.post("/api/analyze", json={"text": HUMAN}).headers["cache-control"] == "no-store"
+    assert client.get("/api/meta").headers["cache-control"] == "no-store"
+
+
+def test_rate_table_forgets_idle_ips(monkeypatch):
+    server.hits.clear()
+    server.hits["203.0.113.9"].append(0.0)              # last seen long ago
+    server.rate_limited("198.51.100.1")
+    assert "203.0.113.9" not in server.hits
+    server.hits.clear()
+
+
 def test_rate_limit(monkeypatch):
     monkeypatch.setattr(server, "RATE", (2, 60))
     server.hits.clear()

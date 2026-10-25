@@ -159,7 +159,7 @@ function Footer() {
         <FooterCol title="Product" links={[["/detect", "Detector"], ["/results", "Results"], ["/method", "Method"]]} />
         <FooterCol title="Learn" links={[["/method#data", "Datasets"], ["/method#features", "The 18 features"], ["/method#limits", "Limits and ethics"]]} />
       </div>
-      <div className="mx-auto max-w-6xl px-4 pb-10 text-xs text-white/40 sm:px-6">
+      <div className="mx-auto max-w-6xl px-4 pb-10 text-xs text-white/55 sm:px-6">
         Models: XGBoost + TF-IDF logistic regression, explained with SHAP. Trained on HC3, HAP-E and M4GT.
       </div>
     </footer>

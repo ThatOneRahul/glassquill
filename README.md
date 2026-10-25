@@ -83,7 +83,19 @@ python server.py                                      # site + API at http://127
 
 For frontend work, run `python server.py` and `npm run dev` (in `web/`) together: Vite serves on http://localhost:5173 and forwards `/api` to the server. Before deploying, set `SITE_URL` (e.g. `SITE_URL=https://your-domain npm run build`), because canonical links, Open Graph tags, `sitemap.xml` and `robots.txt` are generated from it. Checks: `npm run lint`, `npm run typecheck`, `python -m pytest tests -q`.
 
-Pages: `/` (landing), `/detect` (the detector), `/results` (all metrics, read live from `reports/`), `/method`. The API (`POST /api/analyze`, `GET /api/meta`) validates input (50 words to 12,000 characters), rate-limits per IP, caps request size and sends security headers (CSP, frame and content-type protection). Pasted text is never stored.
+Pages: `/` (landing), `/detect` (the detector), `/results` (all metrics, read live from `reports/`), `/method`. Pasted text is never stored or logged.
+
+**Security measures in `server.py`** (each one has a test in `tests/test_server.py`):
+
+- Input: 50 words to 12,000 characters. Control and invisible characters (null bytes, zero-width spaces, RTL overrides) are stripped before analysis, so they can't be used to sway the verdict. Text that isn't English prose (emoji, numbers, other scripts, repeated words) is refused with a clear message instead of getting a meaningless score.
+- Requests: 64 KB body cap, and `Content-Length` is required (chunked bodies would bypass the cap). Validation errors never echo the submitted text back.
+- Abuse: a per-IP sliding-window rate limit (default 20 analyses per minute, `GLASSQUILL_RATE`) whose table forgets idle IPs. A request that can't get the model within 20 s gets a 503 instead of tying up a worker.
+- Headers: CSP (`script-src 'self'`, no frames, no plugins), `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP/CORP, HSTS when served over HTTPS. `Cache-Control: no-store` on the API (results contain the pasted text), long-lived caching for hashed assets.
+- Other: API docs disabled, real 404s, no path traversal, CORS limited to the dev frontend (`GLASSQUILL_CORS`), binds to 127.0.0.1 by default.
+
+When deploying behind a reverse proxy (nginx, Caddy, a PaaS router), set `GLASSQUILL_TRUST_PROXY=1` so the rate limit uses the client's IP from `X-Forwarded-For` rather than the proxy's. Only set it behind a proxy you control, otherwise clients can fake the header.
+
+Dependency audit (October 2026): `npm audit` reports 0 vulnerabilities; `pip-audit` reports 2 advisories in `setuptools`, which only matter when installing packages and can't be upgraded past 81.x because torch pins `setuptools<82`. Pillow is 13.x for its security fixes; Gradio declares `pillow<13` but the Gradio app was tested and works.
 
 Stages: `data → features → train → bert → evaluate → ood → paraphrase → explain`. Every table ends up in `reports/` (start with [`reports/RESULTS.md`](reports/RESULTS.md)) and every plot in `reports/figures/`. The trained XGBoost, TF-IDF + LR and perplexity threshold are committed in `models/`, so the app runs without retraining. DistilBERT (`models/distilbert/`, ~260 MB) is not committed.
 

@@ -25,12 +25,13 @@ const VERDICT: Record<Verdict, { title: string; text: string; bg: string; ring: 
 const asWhole = (v: number) => Math.round(v).toString();
 
 export default function Detect() {
-  const { meta } = useMeta();
+  const { meta, error: metaError } = useMeta();
   const minWords = meta?.limits.min_words ?? 50;
   const maxChars = meta?.limits.max_chars ?? 12000;
 
   const [text, setText] = useState("");
   const [result, setResult] = useState<Analysis | null>(null);
+  const [analysed, setAnalysed] = useState("");   // the text the current result belongs to
   const [runId, setRunId] = useState(0);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ msg: string; tone: "error" | "ok" } | null>(null);
@@ -55,6 +56,7 @@ export default function Detect() {
     try {
       const r = await analyze(text, abort.current.signal);
       setResult(r);
+      setAnalysed(text);
       setRunId((n) => n + 1);
       if (window.matchMedia("(max-width: 1279px)").matches) {
         requestAnimationFrame(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
@@ -124,7 +126,9 @@ export default function Detect() {
                   <Sparkles className="size-3.5 text-flame" aria-hidden="true" /> {e.label}
                 </motion.button>
               ))
-            : Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-10 w-36 !rounded-full" />)}
+            : metaError
+              ? <p className="text-sm text-white/55">Examples are unavailable right now; you can still paste your own text.</p>
+              : Array.from({ length: 4 }, (_, i) => <Skeleton key={i} className="h-10 w-36 !rounded-full" />)}
         </div>
       </PageHeader>
 
@@ -155,7 +159,7 @@ export default function Detect() {
               aria-invalid={!!hint}
               aria-describedby="text-help"
               placeholder="Paste an English text of 50 to 400 words…"
-              className={`block h-64 w-full resize-y rounded-2xl border bg-canvas/60 p-4 text-[15px] leading-relaxed text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-violet focus:bg-white sm:h-72 dark:bg-white/[0.04] dark:text-white dark:placeholder:text-white/30 dark:focus:bg-white/[0.06] ${hint ? "border-ai" : "border-line dark:border-white/10"}`}
+              className={`block h-64 w-full resize-y rounded-2xl border bg-canvas/60 p-4 text-[15px] leading-relaxed text-ink outline-none transition-colors placeholder:text-ink/35 focus:border-violet focus:bg-white sm:h-72 dark:bg-white/[0.04] dark:text-white dark:placeholder:text-white/50 dark:focus:bg-white/[0.06] ${hint ? "border-ai" : "border-line dark:border-white/10"}`}
             />
           </div>
           <div id="text-help" className="mt-3" aria-live="polite">
@@ -175,7 +179,7 @@ export default function Detect() {
             </AnimatePresence>
           </div>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="hidden text-xs text-ink/45 sm:block dark:text-white/40">
+            <p className="hidden text-xs text-ink/45 sm:block dark:text-white/55">
               <kbd className="rounded border border-line px-1.5 py-0.5 font-sans dark:border-white/15">Ctrl</kbd> +{" "}
               <kbd className="rounded border border-line px-1.5 py-0.5 font-sans dark:border-white/15">Enter</kbd> to analyse
             </p>
@@ -197,7 +201,7 @@ export default function Detect() {
                 <div className="grid grid-cols-2 gap-3"><Skeleton className="h-20" /><Skeleton className="h-20" /></div>
               </motion.div>
             ) : result ? (
-              <VerdictView key={`r${runId}`} r={result} onCopy={copyResult} />
+              <VerdictView key={`r${runId}`} r={result} onCopy={copyResult} stale={text.trim() !== analysed.trim()} />
             ) : (
               <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="grid min-h-72 place-items-center text-center">
                 <div>
@@ -215,14 +219,14 @@ export default function Detect() {
         {/* ---- how to read the score ---- */}
         <motion.section variants={pop} className="card flex flex-wrap items-center gap-x-8 gap-y-3 px-6 py-4 xl:col-span-12" aria-labelledby="bands">
           <h2 id="bands" className="flex items-center gap-2 text-sm font-semibold">
-            <Info className="size-4 text-white/40" aria-hidden="true" /> Reading the verdict
+            <Info className="size-4 text-white/55" aria-hidden="true" /> Reading the verdict
           </h2>
           <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
             <Band color="bg-ai" label="Likely AI" range="65 – 100%" />
             <Band color="bg-unsure" label="Unclear" range="35 – 65%" />
             <Band color="bg-human" label="Likely human" range="0 – 35%" />
           </ul>
-          <p className="text-xs text-white/45 lg:ml-auto">Average of two models. A second opinion with reasons, never proof.</p>
+          <p className="text-xs text-white/55 lg:ml-auto">Average of two models. A second opinion with reasons, never proof.</p>
         </motion.section>
 
         {/* ---- explanations (appear after a result) ---- */}
@@ -274,18 +278,31 @@ function IconButton({ label, onClick, disabled, children }: { label: string; onC
   );
 }
 
-function VerdictView({ r, onCopy }: { r: Analysis; onCopy: () => void }) {
+function VerdictView({ r, onCopy, stale }: { r: Analysis; onCopy: () => void; stale: boolean }) {
   const v = VERDICT[r.verdict];
   const [copied, setCopied] = useState(false);
   return (
     <motion.div initial="hidden" animate="show" exit={{ opacity: 0 }} variants={group(0.08)} className="mt-4">
+      <AnimatePresence initial={false}>
+        {stale && (
+          <motion.p
+            role="status"
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="mb-3 rounded-xl bg-unsure/10 px-3 py-2 text-xs font-medium text-unsure"
+          >
+            You've edited the text since this result. Press Analyse to update it.
+          </motion.p>
+        )}
+      </AnimatePresence>
       <motion.span variants={pop} className={`inline-flex items-center gap-2 rounded-full bg-current/10 px-3 py-1 text-sm font-semibold ${v.text}`}>
         <span className={`size-2 rounded-full ${v.bg}`} aria-hidden="true" /> {v.title}
       </motion.span>
       <motion.p variants={pop} className={`mt-3 flex items-baseline ${v.text}`}>
         <CountUp value={r.p_final * 100} format={asWhole} className="text-7xl font-extrabold" />
         <span className="ml-1 text-3xl font-bold">%</span>
-        <span className="ml-3 text-sm font-medium text-ink/55 dark:text-white/50">chance it is AI-generated</span>
+        <span className="ml-3 text-sm font-medium text-ink/55 dark:text-white/60">chance it is AI-generated</span>
       </motion.p>
       <motion.div variants={pop} className="relative mt-4 h-2.5 rounded-full bg-gradient-to-r from-human/25 via-unsure/25 to-ai/25">
         {/* full-width wrapper slid by x%: a transform, so no layout work per frame */}
@@ -306,7 +323,7 @@ function VerdictView({ r, onCopy }: { r: Analysis; onCopy: () => void }) {
       <motion.div variants={pop} className="mt-5 flex flex-wrap items-center justify-between gap-3">
         <p className={`text-sm ${r.models_agree ? "text-ink/60 dark:text-white/55" : "font-medium text-unsure"}`}>
           {r.models_agree ? "Both models agree." : "The models disagree. Treat this with extra caution."}
-          <span className="block text-xs text-ink/40 dark:text-white/35">{r.words} words · analysed in {r.ms} ms</span>
+          <span className="block text-xs text-ink/40 dark:text-white/55">{r.words} words · analysed in {r.ms} ms</span>
         </p>
         <Button
           tone="outline"
@@ -334,7 +351,7 @@ function ModelScore({ label, sub, value }: { label: string; sub: string; value: 
         <CountUp value={value * 100} format={asWhole} />
         <span className="text-lg">%</span>
       </p>
-      <p className="mb-3 text-[11px] text-ink/40 dark:text-white/35">{sub}</p>
+      <p className="mb-3 text-[11px] text-ink/40 dark:text-white/55">{sub}</p>
       <Bar value={value} className="bg-violet" delay={0.3} />
     </motion.div>
   );
@@ -354,7 +371,7 @@ function Reasons({ items }: { items: Contribution[] }) {
   return (
     <motion.section variants={pop} className="card p-5 sm:p-6 xl:col-span-5" aria-labelledby="reasons-h">
       <h2 id="reasons-h" className="font-semibold">Top reasons</h2>
-      <p className="text-xs text-ink/50 dark:text-white/45">From the style model, compared with typical writing</p>
+      <p className="text-xs text-ink/50 dark:text-white/55">From the style model, compared with typical writing</p>
       <motion.ul className="mt-4 divide-y divide-line dark:divide-white/10" variants={group(0.06)}>
         {items.map((c) => (
           <motion.li key={c.feature} variants={{ hidden: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0 } }} className="flex items-center justify-between gap-3 py-3">
@@ -363,7 +380,7 @@ function Reasons({ items }: { items: Contribution[] }) {
                 <span className="font-semibold">{c.name}</span> is <span className="num font-semibold">{fmtFeature(c.feature, c.value)}</span>
               </p>
               {c.typical && (
-                <p className="text-xs text-ink/50 dark:text-white/45">
+                <p className="text-xs text-ink/50 dark:text-white/55">
                   humans ~{fmtFeature(c.feature, c.typical.human)} · AI ~{fmtFeature(c.feature, c.typical.ai)}
                 </p>
               )}
@@ -385,7 +402,7 @@ function ShapChart({ items }: { items: Contribution[] }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 id="shap-h" className="font-semibold">Why: feature contributions</h2>
-          <p className="text-xs text-ink/50 dark:text-white/45">SHAP values of the style model, 10 strongest of 18</p>
+          <p className="text-xs text-ink/50 dark:text-white/55">SHAP values of the style model, 10 strongest of 18</p>
         </div>
         <div className="flex gap-3 text-xs">
           <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-human" />towards human</span>
@@ -430,7 +447,7 @@ function WordEvidence({ highlights }: { highlights: Analysis["highlights"] }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 id="words-h" className="font-semibold">Word evidence</h2>
-          <p className="text-xs text-ink/50 dark:text-white/45">How the word model weighs each word: rose pushes towards AI, green towards human</p>
+          <p className="text-xs text-ink/50 dark:text-white/55">How the word model weighs each word: rose pushes towards AI, green towards human</p>
         </div>
         <Segmented label="Highlight" value={mode} onChange={setMode} options={[{ value: "all", label: "All words" }, { value: "strong", label: "Strongest only" }]} />
       </div>
@@ -444,7 +461,7 @@ function WordEvidence({ highlights }: { highlights: Analysis["highlights"] }) {
               key={i}
               title={show ? `${s > 0 ? "towards AI" : "towards human"} (${s.toFixed(2)})` : undefined}
               className="rounded px-0.5 transition-[background-color] duration-300"
-              style={{ backgroundColor: show ? (s > 0 ? `rgb(225 29 72 / ${alpha})` : `rgb(5 150 105 / ${alpha})`) : "transparent" }}
+              style={{ backgroundColor: show ? (s > 0 ? `rgb(244 63 94 / ${alpha})` : `rgb(5 150 105 / ${alpha})`) : "transparent" }}
             >
               {h.token}
             </span>
@@ -470,7 +487,7 @@ function FeatureTable({ items }: { items: Contribution[] }) {
         <div className="flex flex-wrap items-center gap-2">
           <label className="relative">
             <span className="sr-only">Search features</span>
-            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink/40 dark:text-white/40" aria-hidden="true" />
+            <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-ink/40 dark:text-white/55" aria-hidden="true" />
             <input
               type="search"
               value={q}
@@ -485,7 +502,7 @@ function FeatureTable({ items }: { items: Contribution[] }) {
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[560px] text-sm">
           <thead>
-            <tr className="text-left text-xs text-ink/50 dark:text-white/45">
+            <tr className="text-left text-xs text-ink/50 dark:text-white/55">
               <th scope="col" className="py-2 pr-3 font-medium">Feature</th>
               <th scope="col" className="py-2 pr-3 text-right font-medium">This text</th>
               <th scope="col" className="py-2 pr-3 text-right font-medium">Typical human</th>
@@ -499,18 +516,18 @@ function FeatureTable({ items }: { items: Contribution[] }) {
                 <motion.tr key={c.feature} layout="position" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="border-t border-line dark:border-white/10">
                   <td className="py-2.5 pr-3">
                     <span className="font-medium">{c.name}</span>
-                    <span className="block font-mono text-[11px] text-ink/40 dark:text-white/35">{c.feature}</span>
+                    <span className="block font-mono text-[11px] text-ink/40 dark:text-white/55">{c.feature}</span>
                   </td>
                   <td className="num py-2.5 pr-3 text-right font-semibold">{fmtFeature(c.feature, c.value)}</td>
                   <td className="num py-2.5 pr-3 text-right text-ink/60 dark:text-white/55">{c.typical ? fmtFeature(c.feature, c.typical.human) : "–"}</td>
                   <td className="num py-2.5 pr-3 text-right text-ink/60 dark:text-white/55">{c.typical ? fmtFeature(c.feature, c.typical.ai) : "–"}</td>
-                  <td className="py-2.5 text-right"><Direction shap={c.shap} /> <span className="num ml-1 text-xs text-ink/45 dark:text-white/40">{c.shap > 0 ? "+" : ""}{c.shap.toFixed(2)}</span></td>
+                  <td className="py-2.5 text-right"><Direction shap={c.shap} /> <span className="num ml-1 text-xs text-ink/45 dark:text-white/55">{c.shap > 0 ? "+" : ""}{c.shap.toFixed(2)}</span></td>
                 </motion.tr>
               ))}
             </AnimatePresence>
           </tbody>
         </table>
-        {rows.length === 0 && <p className="py-8 text-center text-sm text-ink/50 dark:text-white/45">No features match “{q}”.</p>}
+        {rows.length === 0 && <p className="py-8 text-center text-sm text-ink/50 dark:text-white/55">No features match “{q}”.</p>}
       </div>
     </motion.section>
   );
