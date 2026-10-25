@@ -5,6 +5,8 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import { ease, spring } from "../lib/motion";
 import { Logo } from "./ui";
 
+const HIDE_CTA = ["/detect", "/results"];
+
 const NAV = [
   { to: "/detect", label: "Detector" },
   { to: "/results", label: "Results" },
@@ -19,6 +21,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   // the menu remembers the page it was opened on, so navigating anywhere closes it
   const [openOn, setOpenOn] = useState<string | null>(null);
   const open = openOn === pathname;
+  const hideCta = HIDE_CTA.includes(pathname);
   const setOpen = (v: boolean | ((o: boolean) => boolean)) =>
     setOpenOn((typeof v === "function" ? v(open) : v) ? pathname : null);
   useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 12));
@@ -67,11 +70,21 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             })}
           </ul>
           <div className="flex items-center gap-2">
-            <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.97 }} transition={spring.press} className="hidden sm:block">
-              <Link to="/detect" className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-semibold text-ink">
+            {/* hidden where the detector is already the point (or one click away). Hiding is a
+                class + `inert`, so it takes effect at once even if animations are paused; the
+                fade is only CSS, and the slot keeps its width so the nav doesn't shift. */}
+            <div
+              inert={hideCta}
+              aria-hidden={hideCta || undefined}
+              className={`hidden transition-[opacity,scale] duration-200 ease-out sm:block ${hideCta ? "pointer-events-none scale-95 opacity-0" : ""}`}
+            >
+              <Link
+                to="/detect"
+                className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-4 text-sm font-semibold text-ink transition-[translate,scale] hover:-translate-y-px active:scale-[0.97]"
+              >
                 Try the detector <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
-            </motion.div>
+            </div>
             <button
               className="grid size-10 place-items-center rounded-full text-white md:hidden"
               aria-label={open ? "Close menu" : "Open menu"}
