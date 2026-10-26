@@ -1,7 +1,8 @@
 # Same pins as requirements-server.txt (the versions the models were trained with),
-# plus the CPU build of torch: Spaces on free hardware have no GPU.
+# plus torch from the CPU index (pip picks 2.11.0+cpu). Written as plain 2.11.0 because
+# Hugging Face rejects other spellings when the Space runs on ZeroGPU hardware.
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.11.0+cpu
+torch==2.11.0
 transformers==5.20.2
 scikit-learn==1.9.1
 xgboost==3.2.0
