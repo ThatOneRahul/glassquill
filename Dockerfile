@@ -3,8 +3,8 @@
 #   docker build -t glassquill .
 #   docker run -p 7860:7860 glassquill        # http://localhost:7860
 #
-# Needs about 1.5 GB of RAM (GPT-2 stays in memory). The Hugging Face Space is built from
-# deploy/hf-space, which runs these same steps on an archive of the app (deploy/make_space.sh).
+# Needs about 1.5 GB of RAM (GPT-2 stays in memory). The free Hugging Face Space doesn't use
+# this file: it runs deploy/hf-space/app.py on Gradio's free runtime (Docker Spaces are paid).
 
 # ---- 1. build the website (same as `cd web && npm ci && npm run build`) -----------------
 FROM node:22-slim AS web

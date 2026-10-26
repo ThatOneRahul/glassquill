@@ -125,7 +125,8 @@ The datasets download automatically on the first run. Every stage saves its outp
 
 The live site runs on a free Hugging Face Space: https://thatonerahul-glassquill.hf.space
 
-- **Update it:** run `bash deploy/make_space.sh`, then upload the three files in `deploy/hf-space` to the Space (Files > Add file > Upload files). It rebuilds in about 10 minutes.
+- **Update it:** run `bash deploy/make_space.sh`, then upload the four files in `deploy/hf-space` (`README.md`, `app.py`, `requirements.txt` and `glassquill-app.tar.gz`) to the Space (Files > Add file > Upload files). It rebuilds in about 10 minutes.
+- **How it runs:** Docker Spaces need a paid plan, so the Space uses the free Gradio runtime. `app.py` unpacks the archive and starts the same `server.py` you run locally.
 - **Anywhere else:** the root `Dockerfile` builds the site and the server into one image (`docker build -t glassquill . && docker run -p 7860:7860 glassquill`). It needs about 1.5 GB of RAM because GPT-2 stays in memory, so 512 MB plans (such as Render's free tier) run out of memory.
 
 ## Testing

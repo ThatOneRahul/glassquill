@@ -3,8 +3,10 @@ title: GlassQuill
 emoji: 🪶
 colorFrom: gray
 colorTo: indigo
-sdk: docker
-app_port: 7860
+sdk: gradio
+sdk_version: 6.30.0
+python_version: "3.11"
+app_file: app.py
 pinned: false
 license: mit
 short_description: Explainable detection of AI-generated text
@@ -23,4 +25,4 @@ On 4,829 held-out texts it reaches 97.4% accuracy at a 2.0% false positive rate.
 
 Made by Ranjan Verma, Rahul Narkhede, Priyansh Johri and Priyansh Pandey as an Applications and Use Cases of Machine Learning case study.
 
-The app's files are in `glassquill-app.tar.gz`; the `Dockerfile` builds the React site and runs the FastAPI server with GPT-2, XGBoost and TF-IDF + logistic regression.
+The app's files are in `glassquill-app.tar.gz`. `app.py` unpacks them and runs GlassQuill's FastAPI server (GPT-2, XGBoost and TF-IDF + logistic regression) with its React site.
