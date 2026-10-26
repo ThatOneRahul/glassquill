@@ -152,6 +152,7 @@ Git-ignored but used locally: `data/` (downloads and cached features), `models/d
 | `GLASSQUILL_TRUST_PROXY` | off | `1` behind a reverse proxy: use the last `X-Forwarded-For` entry and allow `X-Forwarded-Proto` |
 | `GLASSQUILL_CORS` | `http://localhost:5173` | allowed origins (the Vite dev server) |
 | `SITE_URL` | the visited address | fixed public address for canonical links |
+| `GLASSQUILL_FRAME_ANCESTORS` | `'none'` | who may show the site in a frame; the Hugging Face Space sets `https://huggingface.co` |
 
 ### 4.8 The website (`web/`)
 - **Stack:** React 19, React Router 7, Tailwind 4 (design tokens in `@theme` in `index.css`), Motion (`motion/react`) and lucide icons. The site is dark-only.

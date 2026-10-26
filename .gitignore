@@ -12,3 +12,6 @@ web/node_modules/
 web/dist/
 .pytest_cache/
 web/*.tsbuildinfo
+
+# Hugging Face Space upload (built by deploy/make_space.sh)
+deploy/hf-space/*.tar.gz

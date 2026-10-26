@@ -1,0 +1,17 @@
+# Only what the server needs goes into the image
+.git
+.venv
+data
+web/node_modules
+web/dist
+web/*.tsbuildinfo
+models/distilbert
+models/quick
+reports/quick
+reports/figures
+submissions
+docs
+**/__pycache__
+.pytest_cache
+.ipynb_checkpoints
+.env

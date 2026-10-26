@@ -36,6 +36,9 @@ PAGES = {"/", "/detect", "/results", "/method"}             # routes the React a
 
 TRUST_PROXY = os.getenv("GLASSQUILL_TRUST_PROXY") == "1"     # behind nginx etc.: use X-Forwarded-For
 SITE_URL = os.getenv("SITE_URL", "").rstrip("/")           # public address; default: the one visited
+# who may show the site in a frame: nobody by default; a Hugging Face Space sets
+# https://huggingface.co so the site also works inside the Space page
+FRAME_ANCESTORS = os.getenv("GLASSQUILL_FRAME_ANCESTORS", "'none'")
 BUSY_WAIT = 20                                              # seconds a request may wait for the model
 
 det = Detector(str(MODELS))
@@ -47,7 +50,7 @@ app = FastAPI(title="GlassQuill API", docs_url=None, redoc_url=None, openapi_url
 
 CSP = ("default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
        "script-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; "
-       "base-uri 'self'; frame-ancestors 'none'; form-action 'self'")
+       f"base-uri 'self'; frame-ancestors {FRAME_ANCESTORS}; form-action 'self'")
 hits = defaultdict(deque)
 
 
@@ -89,9 +92,11 @@ async def guard(request: Request, call_next):
     response = await call_next(request)
     response.headers.update({
         "Content-Security-Policy": CSP, "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "DENY", "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
         "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
         "Cross-Origin-Opener-Policy": "same-origin", "Cross-Origin-Resource-Policy": "same-origin"})
+    if FRAME_ANCESTORS == "'none'":
+        response.headers["X-Frame-Options"] = "DENY"   # older browsers that ignore the CSP rule
     if request.url.scheme == "https" or request.headers.get("x-forwarded-proto") == "https":
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     if path.startswith("/api/"):
